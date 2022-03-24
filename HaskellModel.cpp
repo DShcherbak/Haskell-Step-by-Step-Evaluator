@@ -84,7 +84,7 @@ void HaskellModel::AddFile(const std::string &fileName) {
     }
     std::cout << lines.size() << std::endl;
     indent_vector lines_with_indentation = indentation(lines);
-    compressed_vector compressed_lines = compress_lines(lines_with_identation);
+    compressed_vector compressed_lines = compress_lines(lines_with_indentation);
     for(int i = 0, n = lines.size(); i < n; i++){
         auto line = lines[i];
         if(!line.empty()){
