@@ -1,5 +1,5 @@
 #include "HaskellModel.h"
-
+#include "Lines/LineParser.h"
 
 
 indent_vector indentation(lines_vector lines){
@@ -8,28 +8,23 @@ indent_vector indentation(lines_vector lines){
         if(line.empty())
             continue;
         size_t ident = 0, i = 0, n = line.size();
-        while(i < n && (line[i] == ' ' || line[i] == '\t')) {
-            if(line[i] == ' ')
-                ident++;
-            else
-                ident += 4;
-            i++;
+        string new_string;
+        while(i < n && line[i] == ' ') {
+            ident++;
         }
         if(i == n)
             continue;
-        string new_string = "";
         while(i < n){
-            if(line[i] == ' ' || line[i] == '\t'){
-                while(line[i] == ' ' || line[i] == '\t'){
+            if(line[i] == ' '){
+                new_string += ' ';
+                while(line[i] == ' ' ){
                     i++;
                 }
-                new_string += ' ';
-                continue;
-            }
-            if(line[i] == '-' && i < n - 1 && line[i+1] == '-'){
+            } else if(line[i] == '-' && i < n - 1 && line[i+1] == '-'){
                 break;
+            } else {
+                new_string += line[i++];
             }
-            new_string += line[i++];
         }
         result.emplace_back(new_string, ident);
     }
@@ -37,28 +32,13 @@ indent_vector indentation(lines_vector lines){
 }
 
 compressed_vector compress_lines(const indent_vector& lines){
-    compressed_vector result;
     size_t cur_line = 0, compressed_line_id = 0, next_line = 0, n = lines.size();
-    while(cur_line < n){
-        bool where = false;
-        result.emplace_back(lines[cur_line].first,lines[cur_line].second,std::vector<std::string>());
-        next_line = cur_line + 1;
-        if(lines[cur_line].first.find("where") > 0){
-            //do where
-        }
-        while(next_line < n - 1){
-            if (lines[next_line].second > lines[cur_line].second){
-                result[compressed_line_id]
-            }
-            if(lines[next_line].first.find("where") > 0){
-                //do where
-            }
-            else
-        }
 
-            compressed_line_id++;
+    LineParser parser = LineParser();
+    for(auto &line : lines){
+        parser.parse_line(line);
     }
-    return result;
+    return parser.get_result();
 }
 
 void HaskellModel::AddFile(const std::string &fileName) {
@@ -75,6 +55,8 @@ void HaskellModel::AddFile(const std::string &fileName) {
             if(c == '\n'){
                 lines.emplace_back("");
                 current_line++;
+            } else if (c == '\t') {
+                lines[current_line] += "    ";
             } else {
                 lines[current_line] += c;
             }

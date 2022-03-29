@@ -9,10 +9,11 @@
 #include <vector>
 #include <tuple>
 #include <iostream>
+#include "Lines/CompressedLine.h"
+
 
 #define indent_vector std::vector<std::pair<std::string, int>>
-#define compressed_line std::tuple<std::string, int, std::vector<std::string>>
-#define compressed_vector std::vector<compressed_line>
+#define compressed_vector std::vector<lines::CompressedLine>
 #define lines_vector std::vector<std::string>
 
 class HaskellModel {
