@@ -2,7 +2,7 @@
 #include "Lines/LineParser.h"
 
 
-indent_vector indentation(lines_vector lines){
+indent_vector indentation(const std::vector<std::string>& lines){
     indent_vector result;
     for(auto &line : lines){
         if(line.empty())
@@ -11,6 +11,7 @@ indent_vector indentation(lines_vector lines){
         string new_string;
         while(i < n && line[i] == ' ') {
             ident++;
+            i++;
         }
         if(i == n)
             continue;
@@ -42,29 +43,26 @@ compressed_vector compress_lines(const indent_vector& lines){
 }
 
 void HaskellModel::AddFile(const std::string &fileName) {
-    lines_vector lines;
+    std::vector<std::string> lines;
 
     try{
-        std::fstream istream(fileName, std::fstream::in);
-        typedef std::istreambuf_iterator<char> buf_iter;
-        char c;
-        lines.emplace_back("");
-        int current_line = 0;
-        for(buf_iter i(istream), e; i != e; ++i){
-            c = *i;
-            if(c == '\n'){
-                lines.emplace_back("");
-                current_line++;
-            } else if (c == '\t') {
-                lines[current_line] += "    ";
-            } else {
-                lines[current_line] += c;
+        std::fstream istream;
+        istream.open(fileName, std::fstream::in);
+        if(istream.is_open()) {
+            typedef std::istreambuf_iterator<char> buf_iter;
+            char c;
+            std::string current_line;
+            while (std::getline(istream, current_line)) {
+                lines.push_back(current_line);
             }
         }
-    }catch(std::exception& ex){
+        istream.close();
+    }
+    catch(std::exception& ex){
         std::cout << "Couldn't parse '" << fileName << "', got an error: " << ex.what() << std::endl;
     }
     std::cout << lines.size() << std::endl;
+    lines = preprocess_lines(lines);
     indent_vector lines_with_indentation = indentation(lines);
     compressed_vector compressed_lines = compress_lines(lines_with_indentation);
     for(int i = 0, n = lines.size(); i < n; i++){
@@ -123,4 +121,23 @@ void HaskellModel::AddFile(const std::string &fileName) {
     }
 
 
+}
+
+std::vector<string> HaskellModel::preprocess_lines(const std::vector<string>& lines) {
+    std::vector<string> result;
+    int current_line = 0;
+    for(auto &line : lines){
+        result.emplace_back("");
+        for(char c : line) {
+            if (c == '\n') {
+                continue;
+            } else if (c == '\t') {
+                result[current_line] += "    ";
+            } else {
+                result[current_line] += c;
+            }
+        }
+        current_line++;
+    }
+    return result;
 }

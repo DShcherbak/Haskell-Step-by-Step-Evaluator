@@ -6,8 +6,7 @@
 class LineParser {
     enum State {Regular, WhereUnknown, Where};
     State state;
-    size_t current_indent;
-    size_t state_indent;
+    int current_indent;
 
     std::vector<lines::CompressedLine> result;
     lines::CompressedLine line_under_construction;
