@@ -33,6 +33,7 @@ void LineParser::parse_line(const std::pair<std::string, int>& parsed_line) {
             current_indent = indent_of_commands(line, where_id + 4);
             if(current_indent > 0){
                 line_under_construction.where_clause.push_back(line.substr(current_indent));
+                current_indent += parsed_line.second;
                 state = Where;
             } else {
                 state = WhereUnknown;
