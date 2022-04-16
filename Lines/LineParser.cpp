@@ -1,16 +1,50 @@
 #include "LineParser.h"
+#include "IndentedLine.h"
 
 LineParser::LineParser(){
     state = Regular;
     current_indent = 0;
-    line_under_construction = lines::CompressedLine();
+    line_under_construction = lines::Statement();
 }
 
-std::vector<lines::CompressedLine> LineParser::get_result() {
+std::vector<lines::Statement> LineParser::get_result() {
     if(!line_under_construction.line.empty()){
         result.push_back(line_under_construction);
     }
     return result;
+}
+
+void LineParser::parse_line(const lines::IndentedLine& line) {
+    if(parse_special_cases(line))
+        return;
+    if(state == Regular){
+        int where_id = line.parsed_line.find("where"); //fix all 'find' occurences
+        add_body_to_current_line(line, where_id);
+        if(where_id >= 0)
+            update_where_state(line, where_id + 5);
+    }
+    else if(state == WhereUnknown){
+        update_where_state(line);
+    }
+    else if (state == Where){
+        if(line.indentation == current_indent){
+            line_under_construction.where_clause.push_back(line.parsed_line);
+        } else if (line.indentation > current_indent){
+            line_under_construction.append_to_where(line.parsed_line);
+        } else {
+            push_next_line(line);
+        }
+    }
+    line_under_construction.append_to_original(line.original_line);
+}
+
+bool LineParser::parse_special_cases(const lines::IndentedLine& line){
+    if(line.parsed_line.starts_with("module") || line.parsed_line.starts_with("import")) {
+        push_next_line(line);
+        line_under_construction.append_to_original(line.original_line);
+        return true;
+    }
+    return false;
 }
 
 int indent_of_commands(const std::string& line, int starting_indent = 0){
@@ -26,61 +60,29 @@ int indent_of_commands(const std::string& line, int starting_indent = 0){
     return result;
 }
 
-void LineParser::parse_line(const std::pair<std::string, int>& parsed_line) {
-    if(parsed_line.first.starts_with("module")){
-        line_under_construction.append(parsed_line.first);
-        return;
+void LineParser::add_body_to_current_line(const lines::IndentedLine& indented_line, int prefix_length){
+    if(indented_line.indentation > current_indent){
+        const std::string prefix = prefix_length > 0 ? indented_line.parsed_line.substr(0, prefix_length) : indented_line.parsed_line;
+        line_under_construction.append(prefix);
+    } else {
+        push_next_line(indented_line, prefix_length);
     }
-    if(state == Regular){
+}
 
-        int where_id = parsed_line.first.find("where"); //fix all 'find' occurences
-        //TODO: REWRITE
-        if(where_id >= 0){
-            std::string line = parsed_line.first;
-            if(parsed_line.second > current_indent){
-                line_under_construction.append(line.substr(0, where_id));
-            } else {
-                result.push_back(line_under_construction);
-                line_under_construction = lines::CompressedLine(line.substr(0, where_id));
-                current_indent = parsed_line.second;
-            }
-            current_indent = indent_of_commands(line, where_id + 5);
-            if(current_indent > 0){
-                line_under_construction.where_clause.push_back(line.substr(current_indent));
-                current_indent += parsed_line.second;
-                state = Where;
-            } else {
-                state = WhereUnknown;
-            }
-        } else {
-            if(parsed_line.second > current_indent){
-                line_under_construction.append(parsed_line.first);
-            } else {
-                result.push_back(line_under_construction);
-                line_under_construction = lines::CompressedLine(parsed_line.first);
-                current_indent = parsed_line.second;
-            }
-        }
-    }
-    else if(state == WhereUnknown){
-        //TODO: Maybe rewrite, only checks if has commands, and empty lines aren't allowed, can simply use indent
-        current_indent = indent_of_commands(parsed_line.first);
-        if(current_indent >= 0){
-            state = Where;
-            line_under_construction.where_clause.push_back(parsed_line.first.substr(current_indent));
-            current_indent += parsed_line.second;
-        }
-    } else if (state == Where){
-        if(parsed_line.second == current_indent){
-            line_under_construction.where_clause.push_back(parsed_line.first);
-        } else if (parsed_line.second > current_indent){
-            //adds this line to current line of where
-            line_under_construction.append_to_where(parsed_line.first);
-        } else {
-            result.push_back(line_under_construction);
-            line_under_construction = lines::CompressedLine(parsed_line.first);
-            current_indent = parsed_line.second;
-            state = Regular;
-        }
+void LineParser::push_next_line(const lines::IndentedLine& line, int prefix_length){
+    const std::string prefix = prefix_length > 0 ? line.parsed_line.substr(0, prefix_length) : line.parsed_line;
+
+    result.push_back(line_under_construction);
+    line_under_construction = lines::Statement(prefix);
+    current_indent = line.indentation;
+    state = Regular;
+}
+
+void LineParser::update_where_state(const lines::IndentedLine& line, int offset) {
+    current_indent = indent_of_commands(line.parsed_line, offset);
+    if(current_indent >= 0){
+        state = Where;
+        line_under_construction.where_clause.push_back(line.parsed_line.substr(current_indent));
+        current_indent += line.indentation;
     }
 }

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "HaskellModel.h"
+#include "Model/HaskellModel.h"
 
 auto getFilesToParse() -> std::vector<std::string>{
     return {"../input/file2.hs"};
@@ -8,9 +8,11 @@ auto getFilesToParse() -> std::vector<std::string>{
 
 int main() {
     HaskellModel haskellModel{};
+    lines::HaskellFileParser fileParser{};
     auto files = getFilesToParse();
     for(auto &file : files){
-        haskellModel.AddFile(file);
+        auto statements = fileParser.ParseFile(file);
+        haskellModel.AddStatements(statements);
     }
     return 0;
 }

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "ExpressionElement.h"
+#include "../deprecated/ExpressionElement.h"
 #define bodies_vector std::vector<std::shared_ptr<ExpressionElement>>
 
 using std::string;
