@@ -4,13 +4,17 @@
 LineParser::LineParser(){
     state = Regular;
     current_indent = 0;
-    line_under_construction = lines::Statement();
+    line_under_construction = lines::LineStatement();
 }
 
-std::vector<lines::Statement> LineParser::get_result() {
+void LineParser::add_current_line(){
     if(!line_under_construction.line.empty()){
         result.push_back(line_under_construction);
     }
+}
+
+std::vector<lines::LineStatement> LineParser::get_result() {
+    add_current_line();
     return result;
 }
 
@@ -71,9 +75,8 @@ void LineParser::add_body_to_current_line(const lines::IndentedLine& indented_li
 
 void LineParser::push_next_line(const lines::IndentedLine& line, int prefix_length){
     const std::string prefix = prefix_length > 0 ? line.parsed_line.substr(0, prefix_length) : line.parsed_line;
-
-    result.push_back(line_under_construction);
-    line_under_construction = lines::Statement(prefix);
+    add_current_line();
+    line_under_construction = lines::LineStatement(prefix);
     current_indent = line.indentation;
     state = Regular;
 }

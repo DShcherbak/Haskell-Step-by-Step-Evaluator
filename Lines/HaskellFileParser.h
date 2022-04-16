@@ -6,12 +6,12 @@
 #include <string>
 #include <vector>
 
-#include "Statement.h"
+#include "LineStatement.h"
 #include "IndentedLine.h"
 #include "LineParser.h"
 
 #define indent_vector std::vector<lines::IndentedLine>
-#define statement_vector std::vector<lines::Statement>
+#define statement_vector std::vector<lines::LineStatement>
 
 const std::vector<std::string> header_prefixes = {"module", "import"};
 const std::vector<std::string> data_prefixes = {"data", "type", "newtype"};

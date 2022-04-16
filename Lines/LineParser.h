@@ -1,7 +1,7 @@
 #ifndef HASKELL_STEP_BY_STEP_EVALUATOR_LINEPARSER_H
 #define HASKELL_STEP_BY_STEP_EVALUATOR_LINEPARSER_H
 #include <vector>
-#include "Statement.h"
+#include "LineStatement.h"
 #include "IndentedLine.h"
 
 class LineParser {
@@ -9,8 +9,8 @@ class LineParser {
     State state;
     int current_indent;
 
-    std::vector<lines::Statement> result;
-    lines::Statement line_under_construction;
+    std::vector<lines::LineStatement> result;
+    lines::LineStatement line_under_construction;
 
     void push_next_line(const lines::IndentedLine &line, int prefix_length = 0);
     void add_body_to_current_line(const lines::IndentedLine &indented_line, int prefix_length = 0);
@@ -18,11 +18,13 @@ class LineParser {
 
 public:
     LineParser();
-    std::vector<lines::Statement> get_result();
+    std::vector<lines::LineStatement> get_result();
     void parse_line(const lines::IndentedLine& line);
 
 
     bool parse_special_cases(const lines::IndentedLine &line);
+
+    void add_current_line();
 };
 
 

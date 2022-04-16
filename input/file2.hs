@@ -11,6 +11,11 @@ myButLast :: [a] -> a
 myButLast (x:y:[]) = x
 myButLast (x:xs) = myButLast xs
 
+guarded n | n > 0     = "Big"
+          | n == 0    = "Medium"
+          | n /= (-1) = "XMedium"
+          | otherwise = "Small"
+
 testBadWhere 0 = 0
 testBadWhere x = go x where go 1 = 1
                             go n = n * go (n-1)
