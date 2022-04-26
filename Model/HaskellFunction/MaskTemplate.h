@@ -5,7 +5,7 @@
 
 namespace function {
 
-    enum TemplateType{Skip,
+    enum class TemplateType{Skip,
                     Any,
                     IntValue,
                     CharValue,

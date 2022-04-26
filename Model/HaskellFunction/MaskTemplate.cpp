@@ -1,14 +1,24 @@
 #include "MaskTemplate.h"
+#include "../../Parsing/parsing.h"
+
 
 function::MaskTemplate::MaskTemplate(std::string &template_string) {
     template_body = template_string;
     if(template_string == "_"){
-        type = Skip;
+        type = TemplateType::Skip;
         return;
     }
 
-    while (template_string.starts_with("(") && template_string.ends_with(")")) {
-        template_string = template_string.substr(1, template_string.size() - 2);
+    if(parsing::remove_spaces(template_string) == "[]"){
+        type = TemplateType::EmptyList;
+    }
+
+    if(template_string.starts_with('\'') && template_string.ends_with('\'')){
+        type = TemplateType::CharValue;
+    }
+
+    if(template_string.starts_with('\"') && template_string.ends_with('\"')){
+        type = TemplateType::StringValue;
     }
 
     if (template_string.find(':') < template_string.size() || template_string.starts_with('[')) {
@@ -16,11 +26,15 @@ function::MaskTemplate::MaskTemplate(std::string &template_string) {
     } else {
         char first = template_string[0];
         if (std::isdigit(first)) {
-            type = IntValue;
+            type = TemplateType::IntValue;
             return;
         }
         if (first == '('){
 
         }
     }
+}
+
+bool function::MaskTemplate::fits_empty_template(){
+
 }

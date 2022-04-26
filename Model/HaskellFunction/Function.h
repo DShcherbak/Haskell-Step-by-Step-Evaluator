@@ -23,7 +23,7 @@ namespace function {
 
     private:
         std::vector<std::shared_ptr<Mask>> masks;
-        int number_of_params;
+        std::size_t number_of_params{};
 
     };
 }

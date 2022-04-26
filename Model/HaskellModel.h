@@ -17,10 +17,12 @@ public:
 private:
     std::unordered_map<std::string, std::shared_ptr<function::Function>> functions;
 
-    void process_functions(const std::vector<lines::LineStatement> &statements);
-    std::vector<lines::LineStatement> process_type_classes(const std::vector<lines::LineStatement> &statements);
-    std::vector<lines::LineStatement> process_data_types(const std::vector<lines::LineStatement> &statements);
-    std::vector<lines::LineStatement> process_headers(const std::vector<lines::LineStatement> &statements);
+    using LineStatements = std::vector<lines::LineStatement>;
+
+    void process_functions(const LineStatements &statements);
+    LineStatements process_type_classes(const LineStatements &statements);
+    LineStatements process_data_types(const LineStatements &statements);
+    LineStatements process_headers(const LineStatements &statements);
 
     std::shared_ptr<function::Function> GetOrCreateFunction(const string &name);
 
