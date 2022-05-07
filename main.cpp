@@ -9,6 +9,7 @@ auto getFilesToParse() -> std::vector<std::string>{
 int main() {
     //system("./commands.sh > result.txt");
     //system("2+2");
+    std::cout << "HEllo" << std::endl;
     HaskellModel haskellModel{};
     lines::HaskellFileParser fileParser{};
     auto files = getFilesToParse();

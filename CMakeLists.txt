@@ -3,6 +3,9 @@ project(Haskell_Step_by_Step_Evaluator)
 
 set(CMAKE_CXX_STANDARD 20)
 
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)
+
 add_executable(Haskell_Step_by_Step_Evaluator main.cpp
         Model/HaskellModel.cpp Model/HaskellModel.h
         Model/HaskellFunction/Function.cpp Model/HaskellFunction/Function.h
@@ -10,4 +13,8 @@ add_executable(Haskell_Step_by_Step_Evaluator main.cpp
         Lines/LineParser.cpp Lines/LineParser.h
         Lines/IndentedLine.cpp Lines/IndentedLine.h
         Lines/HaskellFileParser.cpp Lines/HaskellFileParser.h
-        Model/HaskellFunction/Mask.cpp Model/HaskellFunction/Mask.h Model/HaskellFunction/Guard.cpp Model/HaskellFunction/Guard.h Model/HaskellFunction/Body.cpp Model/HaskellFunction/Body.h Model/HaskellFunction/MaskTemplate.cpp Model/HaskellFunction/MaskTemplate.h Parsing/parsing.cpp Parsing/parsing.h)
+        Model/HaskellFunction/Mask.cpp Model/HaskellFunction/Mask.h
+        Model/HaskellFunction/Guard.cpp Model/HaskellFunction/Guard.h
+        Model/HaskellFunction/Body.cpp Model/HaskellFunction/Body.h
+        Model/HaskellFunction/MaskTemplate.cpp Model/HaskellFunction/MaskTemplate.h
+        Parsing/parsing.cpp Parsing/parsing.h)

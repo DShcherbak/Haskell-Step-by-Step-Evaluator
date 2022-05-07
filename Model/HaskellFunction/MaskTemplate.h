@@ -8,15 +8,18 @@ namespace function {
     enum class TemplateType{Skip,
                     Any,
                     IntValue,
+                    FloatValue,
                     CharValue,
                     StringValue,
                     EmptyList,
                     TupleConstructor,
                     ListConstructor,
-                    DataConstructor};
+                    DataConstructor,
+                    BrokenType};
 
     class MaskTemplate {
     public:
+        ~MaskTemplate()=default;
         TemplateType type;
         std::string template_body;
         explicit MaskTemplate(std::string& template_string);

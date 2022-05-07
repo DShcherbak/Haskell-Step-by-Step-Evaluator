@@ -1,16 +1,7 @@
 #include "Mask.h"
 #include "../../Parsing/parsing.h"
 
-
-//1 =1
-// 1 8 = 9 = 3
-// 1 8 27 = 36 = 6
-// 1 8 27 64 = 100 = 10
-
-//sum(i) = ((i+1)*i/2)^2 - ((i-1)*i/2)^2 = (i^2 + i)^2 - (i^2 - i)^2 /4 =
-//        = i^4 + 2i^3 + i^2 - i^4 + 2i^3 - i^2 = 4i^3 / 4 = i^3
-
-// f a b (c:(d:e)) with no '=' at the end
+// f a b ('c':('d':"e")) with no '=' at the end
 function::Mask::Mask(const std::string& mask_string) {
     using std::string, std::vector;
 
