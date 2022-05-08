@@ -1,14 +1,20 @@
+#include <iostream>
 #include "Mask.h"
-#include "../../Parsing/parsing.h"
+
 
 // f a b ('c':('d':"e")) with no '=' at the end
+
+
+
 function::Mask::Mask(const std::string& mask_string) {
     using std::string, std::vector;
 
-    std::vector<std::string> line_elements = parsing::split_by_space(mask_string);
+    auto line_elements = PartiallyParsedString::split_by_space(mask_string);
     for(auto& line_element : line_elements){
-        templates.emplace_back(std::make_shared<MaskTemplate>(line_element));
+        std::cout << line_element.line << std::endl;
+        templates.emplace_back(PartiallyParsedString::parse_line(line_element));
     }
+    std::cout << templates[0]->template_body << std::endl;
 
 }
 

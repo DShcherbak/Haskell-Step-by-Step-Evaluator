@@ -6,6 +6,8 @@
 #include "Guard.h"
 #include "Body.h"
 #include "MaskTemplate.h"
+#include "../../Parsing/parsing.h"
+#include "../../Parsing/PartiallyParsedString.h"
 
 namespace function {
     class Mask {

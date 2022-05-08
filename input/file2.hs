@@ -1,15 +1,23 @@
-module Main where
-import Data.Tuple (swap)
-import Data.List (insertBy)
+--module Main where
+--import Data.Tuple (swap)
+--import Data.List (insertBy)
 
-myLast :: [a] -> a
-myLast (x:[]) = x
-myLast (x:xs) =
-    myLast xs
+--myLast :: [a] -> a
+--myLast (x:[]) = x
+--myLast (x:xs) =
+--    myLast xs
 
-myButLast :: [a] -> a
-myButLast (x:y:[]) = x
-myButLast (x:xs) = myButLast xs
+--myButLast :: [a] -> a
+--myButLast (x:y:[]) = x
+--myButLast (x:xs) = myButLast xs
+
+--data Number1 = Int :+ Int
+
+goodForNothing (1 :+ m, (('a', "(b,c)"), ["d,e", _, n, '(' : 'f' : ",g)"], "( asd)" )) = "PARSED!"
+goodForNothing _ = "doesn't parse..."
+
+good'N't' ('a':('b':"c   sdf (")) = "abc"
+good'N't' x = "---"
 
 guarded n | n > 0     = "Big"
           | n == 0    = "Medium"

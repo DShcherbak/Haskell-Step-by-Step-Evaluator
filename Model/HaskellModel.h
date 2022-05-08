@@ -7,6 +7,7 @@
 #include <tuple>
 #include <iostream>
 #include <unordered_map>
+#include <map>
 #include "../Lines/HaskellFileParser.h"
 
 
@@ -14,8 +15,9 @@ class HaskellModel {
 public:
     void AddStatements(statement_vector& statements);
 
+
 private:
-    std::unordered_map<std::string, std::shared_ptr<function::Function>> functions;
+    std::map<std::string, std::shared_ptr<function::Function>> functions;
 
     using LineStatements = std::vector<lines::LineStatement>;
 
