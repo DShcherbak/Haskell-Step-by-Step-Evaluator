@@ -10,10 +10,10 @@
 
 
 /*
- * TODO: Finish complex template parsing
- * TODO: Infix data constructor operators!
+ * TODO: Finish complex template parsing: Only named Data constructors left
+ * !! DAta constructors (named or infix of prefix) should work same as list and tuple
+ * TODO: Sugared and desugared list are different
  * TODO: Template string value
- * TODO: Remove 'complexList' and 'ComplexTuple' types
  * TODO: Rename classes, maybe restructure
  */
 namespace function {

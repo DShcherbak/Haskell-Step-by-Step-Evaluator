@@ -69,7 +69,11 @@ bool function::MaskTemplate::check_any_value(const std::string& template_string,
         if(!std::isalpha(c) || c == '_' || c == '\'')
             return false;
     }
-    return template_string[0] != '\'';
+    if(template_string[0] != '\''){
+        type = function::TemplateType::Any;
+        return true;
+    }
+    return false;
 }
 
 std::shared_ptr<function::MaskTemplate> make_list_template(std::vector<std::string> list_elements){
@@ -133,12 +137,4 @@ function::MaskTemplate::MaskTemplate(const PartiallyParsedString &template_strin
 
 }
 
-
-function::ComplexMaskTemplate::ComplexMaskTemplate(const std::string &template_string) : MaskTemplate(template_string) {
-
-}
-
-function::ComplexMaskTemplate::ComplexMaskTemplate(const PartiallyParsedString &template_string) : MaskTemplate(template_string) {
-
-}
 

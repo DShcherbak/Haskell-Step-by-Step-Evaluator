@@ -165,16 +165,15 @@ namespace function {
             return nullptr;
         }
 
-        auto result = std::make_shared<function::ComplexMaskTemplate>();
+        auto result = std::make_shared<function::MaskTemplate>();
         result->First = list_elements[0];
-        result->type = type == TemplateType::List ? function::TemplateType::ListConstructor : function::TemplateType::TupleConstructor;
-        auto rest = (std::shared_ptr<function::ComplexMaskTemplate>) result;
+        result->type = type;
+        auto rest = (std::shared_ptr<function::MaskTemplate>) result;
 
         while(i < n){
-            std::shared_ptr<function::ComplexMaskTemplate> new_rest = std::make_shared<function::ComplexMaskTemplate>();
-            rest->Rest = new_rest;
-            rest = new_rest;
-            rest->type = result->type;
+            rest->Rest = std::make_shared<function::MaskTemplate>();
+            rest = rest->Rest;
+            rest->type = type;
             rest->First = list_elements[i];
             i++;
         }
@@ -202,15 +201,12 @@ namespace function {
             list_elements.push_back(parsedString.substr(prev_start, line.size()));
         }
 
-        auto result = std::make_shared<function::ComplexMaskTemplate>();
-        result->type = TemplateType::List;
         auto constructed = construct_templates(list_elements);
-        result->First = construct_iterative(constructed, result->type);
+        auto result = construct_iterative(constructed,TemplateType::List);
         auto current = result;
         while(current->Rest != nullptr){
             current = current->Rest;
         }
-        current->First->type = TemplateType::List; // Так точно має бути але я хз чи це спрацює
         return result;
 
 
@@ -223,14 +219,13 @@ namespace function {
         line = parse_internal_brackets(line);
         line = parse_sugared_lists(line);
         if(line.line.find(',') != std::string::npos){
-            auto result = std::make_shared<function::MaskTemplate>();
-            if(line.line.starts_with('['))
-                result->type = TemplateType::List;
-            else
-                result->type = TemplateType::Tuple;
+            std::shared_ptr<function::MaskTemplate> result;
             auto list_elements = divide_pps_by(line, ',');
             auto constructed = construct_templates(list_elements);
-            result->First = construct_iterative(constructed, result->type);
+            if(line.line.starts_with('['))
+                result = construct_iterative(constructed, TemplateType::List);
+            else
+                result = construct_iterative(constructed, TemplateType::Tuple);
             return result;
         }
         auto desugared_list = parse_desugared_list(line);
@@ -343,8 +338,8 @@ namespace function {
         while(parsedString.operators.contains(parsedString.line[col]))
             col++;
         auto second_half = parsedString.substr(col, parsedString.line.size());
-        auto second_ptr = std::make_shared<function::ComplexMaskTemplate>(second_half);
-        auto result = std::make_shared<function::ComplexMaskTemplate>();
+        auto second_ptr = std::make_shared<function::MaskTemplate>(second_half);
+        auto result = std::make_shared<function::MaskTemplate>();
         result->type = TemplateType::DataConstructor;
         result->First = first_ptr;
         result->Rest = second_ptr;

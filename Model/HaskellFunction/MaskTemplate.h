@@ -17,9 +17,7 @@ namespace function {
                     StringValue,
                     EmptyList,
                     Tuple,
-                    TupleConstructor,
                     List,
-                    ListConstructor,
                     DataConstructor,
                     BrokenType};
 
@@ -29,6 +27,7 @@ namespace function {
         TemplateType type;
         std::string template_body;
         std::shared_ptr<MaskTemplate> First;
+        std::shared_ptr<MaskTemplate> Rest;
         explicit MaskTemplate(const std::string &template_string);
         explicit MaskTemplate(const PartiallyParsedString& template_string);
         explicit MaskTemplate();
@@ -44,14 +43,6 @@ namespace function {
         bool check_tuple(const std::string& template_string, function::TemplateType& type);
         bool check_complex_value(const std::string& template_string, function::TemplateType& type);
 
-    };
-
-    class ComplexMaskTemplate : public MaskTemplate {
-    public:
-        std::shared_ptr<ComplexMaskTemplate> Rest;
-        explicit ComplexMaskTemplate(const std::string &template_string);
-        explicit ComplexMaskTemplate(const PartiallyParsedString& template_string);
-        ComplexMaskTemplate()=default;
     };
 }
 
