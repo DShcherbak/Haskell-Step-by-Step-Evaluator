@@ -10,11 +10,16 @@ function::Mask::Mask(const std::string& mask_string) {
     using std::string, std::vector;
 
     auto line_elements = PartiallyParsedString::split_by_space(mask_string);
-    for(auto& line_element : line_elements){
+    auto good_lines = std::vector<PartiallyParsedString>();
+    for(int i = 1, n = line_elements.size(); i < n; i++){
+        if(!line_elements[i].line.empty())
+            good_lines.push_back(line_elements[i]);
+    }
+    for(auto& line_element : good_lines){
         std::cout << line_element.line << std::endl;
         templates.emplace_back(PartiallyParsedString::parse_line(line_element));
     }
-    std::cout << templates[0]->template_body << std::endl;
+    //std::cout << templates[0]->template_body << std::endl;
 
 }
 
