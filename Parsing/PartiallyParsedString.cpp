@@ -193,8 +193,8 @@ namespace function {
             if(start != line.size()-1 && !parsedString.operators.contains(line[start+1])){
                 list_elements.push_back(parsedString.substr(prev_start, start));
             }
-            prev_start = start;
-            start = line.find(':', start);
+            prev_start = start+1;
+            start = line.find(':', prev_start);
         }
         if(list_elements.empty()) {
             return nullptr;
@@ -237,7 +237,9 @@ namespace function {
         if(desugared_list != nullptr)
             return desugared_list;
 
-        line = parse_constructor_operators(line);
+        auto constructed = parse_constructor_operators(line);
+        if(constructed != nullptr)
+            return constructed;
         line = parse_named_constructors(line);
         if (line.line == "$") {
             return line.get_resulting_template();
@@ -322,10 +324,10 @@ namespace function {
         }
         if(start > 0 && line[start-1] == '$' && line[start] == '$')
             start++;
-        if(finish < line.size() && line[finish+1] == '$' && line[finish] == '$')
+        if(finish < line.size() && line[finish-1] == '$' && line[finish] == '$')
             finish++;
-        substring.line = line.substr(start, finish);
-        for(int i = start; i <= finish; i++){
+        substring.line = line.substr(start, finish-start);
+        for(int i = start; i < finish; i++){
             if(line[i] == '$' && line[i+1] != '$')
                 substring.replacements.push_back(replacements[j++]);
         }
@@ -350,7 +352,7 @@ namespace function {
     }
 
     PartiallyParsedString PartiallyParsedString::parse_named_constructors(const PartiallyParsedString &line) {
-        size_t col = parsedString.line.find(':');
+      /*  size_t col = parsedString.line.find(':');
         if(col == std::string::npos)
             return nullptr;
         auto first_half = parsedString.substr(0, col);
@@ -363,7 +365,7 @@ namespace function {
         result->type = TemplateType::DataConstructor;
         result->First = first_ptr;
         result->Rest = second_ptr;
-        return result;
+        return result;*/return line;
     }
 
     std::vector<std::shared_ptr<function::MaskTemplate>> PartiallyParsedString::construct_templates(std::vector<PartiallyParsedString> partuallyParsedStrings) {

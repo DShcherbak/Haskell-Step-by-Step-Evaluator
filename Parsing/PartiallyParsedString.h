@@ -28,7 +28,7 @@ namespace function {
     public:
         std::set<char> operators;
         PartiallyParsedString();
-        PartiallyParsedString(const std::string &line);
+        explicit PartiallyParsedString(const std::string &line);
         std::string line;
         std::vector<std::shared_ptr<MaskTemplate>> replacements;
 

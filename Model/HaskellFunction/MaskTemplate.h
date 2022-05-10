@@ -29,7 +29,7 @@ namespace function {
         TemplateType type;
         std::string template_body;
         std::shared_ptr<MaskTemplate> First;
-        explicit MaskTemplate(std::string& template_string);
+        explicit MaskTemplate(const std::string &template_string);
         explicit MaskTemplate(const PartiallyParsedString& template_string);
         explicit MaskTemplate();
 
@@ -39,6 +39,7 @@ namespace function {
         static bool check_char_value(const std::string& template_string, function::TemplateType& type);
         static bool check_string_value(const std::string& template_string, function::TemplateType& type);
         static bool check_num_value(const std::string& template_string, function::TemplateType& type);
+        static bool check_any_value(const std::string& template_string, function::TemplateType& type);
         bool check_non_empty_list(const std::string& template_string, function::TemplateType& type);
         bool check_tuple(const std::string& template_string, function::TemplateType& type);
         bool check_complex_value(const std::string& template_string, function::TemplateType& type);
@@ -48,7 +49,9 @@ namespace function {
     class ComplexMaskTemplate : public MaskTemplate {
     public:
         std::shared_ptr<ComplexMaskTemplate> Rest;
-        explicit ComplexMaskTemplate(std::string& template_string);
+        explicit ComplexMaskTemplate(const std::string &template_string);
+        explicit ComplexMaskTemplate(const PartiallyParsedString& template_string);
+        ComplexMaskTemplate()=default;
     };
 }
 
