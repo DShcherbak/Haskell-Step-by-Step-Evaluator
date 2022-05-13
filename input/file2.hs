@@ -18,6 +18,7 @@ goodForNothing (1 :+ m, (('a', "(b,c)"),             ["d,e", _, n,
 goodForNothing _ = "doesn't parse..."
 
 good'N't' ('a':('b':"c   sdf (")) = "abc"
+good'N't' (1:(2:[3,4,5])) = "12345"
 good'N't' x = "---"
 
 parsingNames (Left errorMsg) = Left ("Got error: " ++ errorMsg)

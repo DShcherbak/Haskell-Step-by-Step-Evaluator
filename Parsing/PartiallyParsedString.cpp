@@ -182,6 +182,10 @@ namespace function {
             rest->First = list_elements[i];
             i++;
         }
+        if(result->type == TemplateType::List){
+            rest->Rest = std::make_shared<function::MaskTemplate>();
+            rest->Rest->type = TemplateType::EmptyList;
+        }
         return result;
     }
 
