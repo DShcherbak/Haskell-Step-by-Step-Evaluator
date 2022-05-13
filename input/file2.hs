@@ -13,11 +13,22 @@
 
 --data Number1 = Int :+ Int
 
-goodForNothing (1 :+ m, (('a', "(b,c)"), ["d,e", _, n, '(' : 'f' : ",g)"], "( asd)" )) = "PARSED!"
+goodForNothing (1 :+ m, (('a', "(b,c)"),             ["d,e", _, n,
+            '(' : 'f' : ",g)"], "( asd)" )) = "PARSED!"
 goodForNothing _ = "doesn't parse..."
 
 good'N't' ('a':('b':"c   sdf (")) = "abc"
 good'N't' x = "---"
+
+parsingNames (Left errorMsg) = Left ("Got error: " ++ errorMsg)
+parsingNames (Right (Just x)) = Right $ "Got result: " ++ show x
+parsingNames _ = Left "Something weird"
+
+parsingCusNamed (SomeCust 1 2 3) = 1
+parsingCusNamed (SomeCust' _ x [1,2,3]) = 2
+parsingCusNamed _ = 3
+
+
 
 guarded n | n > 0     = "Big"
           | n == 0    = "Medium"

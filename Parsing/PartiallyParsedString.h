@@ -10,11 +10,13 @@
 
 
 /*
- * TODO: Finish complex template parsing: Only named Data constructors left
+ * TODO: Finish complex template parsing: Prefix data constructor operators
  * !! DAta constructors (named or infix of prefix) should work same as list and tuple
  * TODO: Sugared and desugared list are different
  * TODO: Template string value
  * TODO: Rename classes, maybe restructure
+ * TODO: Problem of 2 substitudes
+ * TODO: May need "incomplete data constructor" template type
  */
 namespace function {
 
@@ -27,6 +29,7 @@ namespace function {
 
     public:
         std::set<char> operators;
+        bool parenthesized = false;
         PartiallyParsedString();
         explicit PartiallyParsedString(const std::string &line);
         std::string line;
@@ -48,7 +51,7 @@ namespace function {
 
         static std::shared_ptr<function::MaskTemplate> parse_constructor_operators(PartiallyParsedString parsedString);
 
-        static PartiallyParsedString parse_named_constructors(const PartiallyParsedString &line);
+        static std::shared_ptr<function::MaskTemplate> parse_named_constructors(PartiallyParsedString line);
 
         static PartiallyParsedString parse_any_brackets(PartiallyParsedString parsedLine, char open, char close);
 

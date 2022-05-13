@@ -9,6 +9,18 @@ namespace function {
             operators.insert(c);
     }
 
+
+    std::string trim(std::string line){
+        while(line.starts_with(' ')){
+            line = line.substr(1);
+        }
+        while(line.ends_with(' ')){
+            line.pop_back();
+        }
+        return line;
+    }
+
+
     std::string PartiallyParsedString::preprocess_string(const std::string &line) {
         std::string result;
         for (char c: line) {
@@ -27,7 +39,7 @@ namespace function {
         enum MaskParserState {
             Default, NewWord, SingleQuotes, DoubleQuotes
         };
-        MaskParserState state;
+        MaskParserState state = Default;
 
         PartiallyParsedString line_element{};
         std::string substitude;
@@ -39,6 +51,7 @@ namespace function {
             switch (state) {
                 case Default:
                     if (bracket_depth == 0 && current_symbol == ' ') {
+                        line_element.line = trim(line_element.line);
                         if (!line_element.line.empty())
                             result.push_back(line_element);
                         line_element = PartiallyParsedString{};
@@ -78,6 +91,7 @@ namespace function {
                             bracket_depth--;
                             break;
                         default:
+                            state = Default;
                             if (line_element.operators.contains(current_symbol))
                                 state = NewWord;
                     }
@@ -111,6 +125,7 @@ namespace function {
                 line_element.line += current_symbol;
         }
 
+        line_element.line = trim(line_element.line);
         if (!line_element.line.empty())
             result.push_back(line_element);
         return result;
@@ -118,16 +133,6 @@ namespace function {
 
     std::shared_ptr<function::MaskTemplate> PartiallyParsedString::get_resulting_template() {
         return replacements[0];
-    }
-
-    std::string trim(std::string line){
-        while(line.starts_with(' ')){
-            line = line.substr(1);
-        }
-        while(line.ends_with(' ')){
-            line.pop_back();
-        }
-        return line;
     }
 
     std::vector<PartiallyParsedString> divide_pps_by(const PartiallyParsedString &parsingLine, char separator){
@@ -182,14 +187,14 @@ namespace function {
 
     std::shared_ptr<function::MaskTemplate> PartiallyParsedString::parse_desugared_list(PartiallyParsedString parsedString) {
         std::string line = parsedString.line;
-        int start = line.find(':'), prev_start = 0;
+        int start = line.find(':'), prev_start = line[0] == '(';
         if(start == std::string::npos)
             return nullptr;
         std::vector<PartiallyParsedString> list_elements{};
 
 
         while(start != std::string::npos){
-            if(start != line.size()-1 && !parsedString.operators.contains(line[start+1])){
+            if(start != line.size()-1 && (!parsedString.operators.contains(line[start+1]) || (start + 2 == line.size() && line[start+1] == '$') ||  (start + 2 < line.size() && line[start+1] == '$' && line[start+2] != '$'))){
                 list_elements.push_back(parsedString.substr(prev_start, start));
             }
             prev_start = start+1;
@@ -198,23 +203,18 @@ namespace function {
         if(list_elements.empty()) {
             return nullptr;
         }else{
-            list_elements.push_back(parsedString.substr(prev_start, line.size()));
+            list_elements.push_back(parsedString.substr(prev_start, line.size() - (line[line.size()-1] == ')')));
         }
 
         auto constructed = construct_templates(list_elements);
         auto result = construct_iterative(constructed,TemplateType::List);
-        auto current = result;
-        while(current->Rest != nullptr){
-            current = current->Rest;
-        }
-        return result;
-
-
         return result;
     }
 
     std::shared_ptr<function::MaskTemplate> PartiallyParsedString::parse_line(PartiallyParsedString &line) {
         line.line = trim(line.line);
+        if (line.line == "$")
+            return line.get_resulting_template();
         std::cout << line.line << std::endl;
         line = parse_internal_brackets(line);
         line = parse_sugared_lists(line);
@@ -235,7 +235,9 @@ namespace function {
         auto constructed = parse_constructor_operators(line);
         if(constructed != nullptr)
             return constructed;
-        line = parse_named_constructors(line);
+        auto named = parse_named_constructors(line);
+        if(named != nullptr)
+            return named;
         if (line.line == "$") {
             return line.get_resulting_template();
         } else {
@@ -297,8 +299,7 @@ namespace function {
             }
             i++;
         }
-        if(exter_brackets)
-            result.line = open + result.line + close;
+        result.parenthesized = exter_brackets;
         return result;
     }
 
@@ -346,22 +347,32 @@ namespace function {
         return result;
     }
 
-    PartiallyParsedString PartiallyParsedString::parse_named_constructors(const PartiallyParsedString &line) {
-      /*  size_t col = parsedString.line.find(':');
-        if(col == std::string::npos)
+    std::shared_ptr<function::MaskTemplate> PartiallyParsedString::parse_named_constructors(PartiallyParsedString parsedString) {
+        if(parsedString.line.empty())
             return nullptr;
-        auto first_half = parsedString.substr(0, col);
-        auto first_ptr = std::make_shared<function::MaskTemplate>(first_half);
-        while(parsedString.operators.contains(parsedString.line[col]))
-            col++;
-        auto second_half = parsedString.substr(col, parsedString.line.size());
-        auto second_ptr = std::make_shared<function::ComplexMaskTemplate>(second_half);
-        auto result = std::make_shared<function::ComplexMaskTemplate>();
-        result->type = TemplateType::DataConstructor;
-        result->First = first_ptr;
-        result->Rest = second_ptr;
-        return result;*/return line;
+        if(!std::isalpha(parsedString.line[0]) || !std::isupper(parsedString.line[0]))
+            return nullptr;
+
+        int col = (int) parsedString.line.find(' ');
+        if(col == std::string::npos)
+            col = (int) parsedString.line.length();
+
+        for(int i = 1; i < col; i++){
+            char cur = parsedString.line[i];
+            if(!std::isalpha(cur) && !std::isdigit(cur) && cur != '_' && cur != '\''){
+                return nullptr;
+            }
+        }
+        auto params = parsedString.substr(col, (int) parsedString.line.size());
+        auto list_elements = divide_pps_by(params, ' ');
+        auto constructed = construct_templates(list_elements);
+
+        auto result = construct_iterative(constructed, TemplateType::DataConstructor);
+        result->template_body = parsedString.line.substr(0, col);
+        return result;
     }
+
+
 
     std::vector<std::shared_ptr<function::MaskTemplate>> PartiallyParsedString::construct_templates(std::vector<PartiallyParsedString> partuallyParsedStrings) {
         std::vector<std::shared_ptr<function::MaskTemplate>> result;
