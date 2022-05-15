@@ -15,7 +15,7 @@ namespace function {
                     FloatValue,
                     CharValue,
                     StringValue,
-                    EmptyList,
+                    EndList,
                     Tuple,
                     List,
                     DataConstructor,
@@ -31,6 +31,7 @@ namespace function {
         explicit MaskTemplate(const std::string &template_string);
         explicit MaskTemplate(const PartiallyParsedString& template_string);
         explicit MaskTemplate();
+        void count_body();
 
     private:
         static bool check_skip_symbol(const std::string& template_string, function::TemplateType& type);

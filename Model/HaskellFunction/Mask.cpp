@@ -16,11 +16,13 @@ function::Mask::Mask(const std::string& mask_string) {
             good_lines.push_back(line_elements[i]);
     }
     for(auto& line_element : good_lines){
-        std::cout << line_element.line << std::endl;
-        templates.emplace_back(PartiallyParsedString::parse_line(line_element));
+        //std::cout << line_element.line << std::endl;
+        auto line_template = PartiallyParsedString::parse_line(line_element);
+        line_template->count_body();
+        templates.emplace_back(line_template);
     }
     if(!templates.empty())
-        std::cout << templates[0]->template_body << std::endl;
+        std::cout << "";//templates[0]->template_body << std::endl;
 
 }
 

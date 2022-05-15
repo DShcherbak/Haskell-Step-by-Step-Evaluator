@@ -29,7 +29,7 @@ namespace function {
 
     public:
         std::set<char> operators;
-        bool parenthesized = false;
+        char parenthesized = '\0';
         PartiallyParsedString();
         explicit PartiallyParsedString(const std::string &line);
         std::string line;

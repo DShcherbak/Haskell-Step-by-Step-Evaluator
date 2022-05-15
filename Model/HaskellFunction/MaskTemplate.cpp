@@ -30,7 +30,7 @@ bool function::MaskTemplate::check_skip_symbol(const std::string& template_strin
 
 bool function::MaskTemplate::check_empty_list(const std::string& template_string, function::TemplateType& type){
     if(parsing::remove_spaces(template_string) == "[]"){
-        type = function::TemplateType::EmptyList;
+        type = function::TemplateType::EndList;
         return true;
     }
     return false;
@@ -135,6 +135,48 @@ function::MaskTemplate::MaskTemplate(const std::string &template_string) {
 
 function::MaskTemplate::MaskTemplate(const PartiallyParsedString &template_string) : MaskTemplate{template_string.line}{
 
+}
+
+void function::MaskTemplate::count_body() {
+    if(!template_body.empty())
+        return;
+    if(First != nullptr)
+        First->count_body();
+    if(Rest != nullptr)
+        Rest->count_body();
+
+    switch(type){
+        case TemplateType::Skip:
+            template_body = "_";
+            break;
+        case TemplateType::EndList:
+            template_body = First->template_body;
+            break;
+        case TemplateType::DataConstructor:
+            template_body = First->template_body + (Rest != nullptr ? " " + Rest->template_body : "");
+            break;
+        case TemplateType::Tuple:
+            if(Rest == nullptr){
+                template_body = "(" + First->template_body + ")";
+            } else {
+                template_body = "(" + First->template_body + "," + Rest->template_body.substr(1);
+            }
+            break;
+        case TemplateType::List:
+            if(Rest == nullptr){
+                template_body = "(" + First->template_body + " : [])";
+            } else {
+                auto rest_bod = Rest->template_body;
+                if(Rest->First != nullptr)
+                    rest_bod = rest_bod.substr(1);
+                template_body = "(" + First->template_body + ":" + rest_bod;
+            }
+        case TemplateType::BrokenType:
+            template_body = "BROKEN TYPE";
+            break;
+        default:
+            return;
+    }
 }
 
 

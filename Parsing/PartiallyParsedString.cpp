@@ -50,11 +50,13 @@ namespace function {
 
             switch (state) {
                 case Default:
-                    if (bracket_depth == 0 && current_symbol == ' ') {
-                        line_element.line = trim(line_element.line);
-                        if (!line_element.line.empty())
-                            result.push_back(line_element);
-                        line_element = PartiallyParsedString{};
+                    if(current_symbol == ' '){
+                        if (bracket_depth == 0) {
+                            line_element.line = trim(line_element.line);
+                            if (!line_element.line.empty())
+                                result.push_back(line_element);
+                            line_element = PartiallyParsedString{};
+                        }
                         state = NewWord;
                     } else {
                         switch (current_symbol) {
@@ -64,6 +66,7 @@ namespace function {
                                 break;
                             case '(':
                                 bracket_depth++;
+                                state = NewWord;
                                 break;
                             case ')':
                                 bracket_depth--;
@@ -92,7 +95,7 @@ namespace function {
                             break;
                         default:
                             state = Default;
-                            if (line_element.operators.contains(current_symbol))
+                            if (current_symbol == ' ' || line_element.operators.contains(current_symbol))
                                 state = NewWord;
                     }
                     break;
@@ -145,7 +148,9 @@ namespace function {
             i++, n--;
         while(i < n){
             if(line[i] == separator) {
-                result.push_back(current);
+                current.line = trim(current.line);
+                if(!current.line.empty())
+                    result.push_back(current);
                 current = PartiallyParsedString{};
             }else {
                 if(line[i] == '$') {
@@ -160,7 +165,9 @@ namespace function {
             }
             i++;
         }
-        result.push_back(current);
+        current.line = trim(current.line);
+        if(!current.line.empty())
+            result.push_back(current);
         return result;
     }
 
@@ -183,8 +190,7 @@ namespace function {
             i++;
         }
         if(result->type == TemplateType::List){
-            rest->Rest = std::make_shared<function::MaskTemplate>();
-            rest->Rest->type = TemplateType::EmptyList;
+            rest->type = TemplateType::EndList;
         }
         return result;
     }
@@ -226,7 +232,7 @@ namespace function {
             std::shared_ptr<function::MaskTemplate> result;
             auto list_elements = divide_pps_by(line, ',');
             auto constructed = construct_templates(list_elements);
-            if(line.line.starts_with('['))
+            if(line.parenthesized == '[')
                 result = construct_iterative(constructed, TemplateType::List);
             else
                 result = construct_iterative(constructed, TemplateType::Tuple);
@@ -303,7 +309,7 @@ namespace function {
             }
             i++;
         }
-        result.parenthesized = exter_brackets;
+        result.parenthesized = exter_brackets ? open : '\0';
         return result;
     }
 
@@ -336,18 +342,25 @@ namespace function {
 
     std::shared_ptr<function::MaskTemplate> PartiallyParsedString::parse_constructor_operators(PartiallyParsedString parsedString) {
         size_t col = parsedString.line.find(':');
+        std::string operator_val;
         if(col == std::string::npos)
             return nullptr;
         auto first_half = parsedString.substr(0, col);
         auto first_ptr = std::make_shared<function::MaskTemplate>(first_half);
-        while(parsedString.operators.contains(parsedString.line[col]))
+        while(parsedString.operators.contains(parsedString.line[col])){
+            operator_val += parsedString.line[col];
             col++;
+        }
+
         auto second_half = parsedString.substr(col, parsedString.line.size());
         auto second_ptr = std::make_shared<function::MaskTemplate>(second_half);
         auto result = std::make_shared<function::MaskTemplate>();
         result->type = TemplateType::DataConstructor;
         result->First = first_ptr;
         result->Rest = second_ptr;
+        result->First->count_body();
+        result->Rest->count_body();
+        result->template_body = result->First->template_body + operator_val + result->Rest->template_body;
         return result;
     }
 
@@ -356,6 +369,7 @@ namespace function {
             return nullptr;
         if(!std::isalpha(parsedString.line[0]) || !std::isupper(parsedString.line[0]))
             return nullptr;
+        std::string constructor_name;
 
         int col = (int) parsedString.line.find(' ');
         if(col == std::string::npos)
@@ -363,6 +377,7 @@ namespace function {
 
         for(int i = 1; i < col; i++){
             char cur = parsedString.line[i];
+            constructor_name += cur;
             if(!std::isalpha(cur) && !std::isdigit(cur) && cur != '_' && cur != '\''){
                 return nullptr;
             }
@@ -372,7 +387,8 @@ namespace function {
         auto constructed = construct_templates(list_elements);
 
         auto result = construct_iterative(constructed, TemplateType::DataConstructor);
-        result->template_body = parsedString.line.substr(0, col);
+        result->count_body();
+        result->template_body = parsedString.line.substr(0, col) + " " + result->template_body;
         return result;
     }
 
