@@ -12,7 +12,7 @@
 /*
  * TODO: Finish complex template parsing: Prefix data constructor operators
  * !! DAta constructors (named or infix of prefix) should work same as list and tuple
- * TODO: Sugared and desugared list are different
+ * TODO: Sugared and desugared list are different -> fix how EndList works, remove unnecessary nodes
  * TODO: Template string value
  * TODO: Rename classes, maybe restructure
  * TODO: Problem of 2 substitudes
