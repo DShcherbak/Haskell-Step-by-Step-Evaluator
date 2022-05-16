@@ -10,13 +10,11 @@
 
 
 /*
- * TODO: Finish complex template parsing: Prefix data constructor operators
  * !! DAta constructors (named or infix of prefix) should work same as list and tuple
- * TODO: Sugared and desugared list are different -> fix how EndList works, remove unnecessary nodes
- * TODO: Template string value
+ * TODO: [b] !!
  * TODO: Rename classes, maybe restructure
- * TODO: Problem of 2 substitudes
- * TODO: May need "incomplete data constructor" template type
+ * !! Problem of 2 substitudes - no idea what it is
+ * !! May need "incomplete data constructor" template type
  */
 namespace function {
 

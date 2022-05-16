@@ -13,13 +13,17 @@
 
 --data Number1 = Int :+ Int
 
-goodForNothing (1 :+ m, (('a', "(b,c)"),             ["d,e", _, n,
-            '(' : 'f' : ",g)"], "( asd)" )) = "PARSED!"
-goodForNothing _ = "doesn't parse..."
+--goodForNothing (1 :+ m, (('a', "(b,c)"),             ["d,e", _, n,
+--            '(' : 'f' : ",g)"], "( asd)" )) = "PARSED!"
+--goodForNothing _ = "doesn't parse..."
 
-good'N't' ('a':('b':"c   sdf (")) = "abc"
+--good'N't' ('a':('b':"c   sdf (")) = "abc"
 good'N't' (1:(2:[3,4,5])) = "12345"
+good'N't' [3] = "--3--"
 good'N't' x = "---"
+
+goodForAll ((:+) 1 2) (3 :+ 4) = 10
+goodForAll _ _ = 9
 
 parsingNames (Left errorMsg) = Left ("Got error: " ++ errorMsg)
 parsingNames (Right (Just x)) = Right $ "Got result: " ++ show x

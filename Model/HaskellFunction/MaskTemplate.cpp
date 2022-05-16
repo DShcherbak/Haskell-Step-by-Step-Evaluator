@@ -150,7 +150,10 @@ void function::MaskTemplate::count_body() {
             template_body = "_";
             break;
         case TemplateType::EndList:
-            template_body = First->template_body;
+            if(First == nullptr)
+                template_body = "([])";
+            else
+                template_body = '(' + First->template_body + ')';
             break;
         case TemplateType::DataConstructor:
             template_body = First->template_body + (Rest != nullptr ? " " + Rest->template_body : "");
@@ -167,16 +170,26 @@ void function::MaskTemplate::count_body() {
                 template_body = "(" + First->template_body + " : [])";
             } else {
                 auto rest_bod = Rest->template_body;
-                if(Rest->First != nullptr)
-                    rest_bod = rest_bod.substr(1);
+                //if(Rest->First != nullptr)
+                rest_bod = rest_bod.substr(1);
                 template_body = "(" + First->template_body + ":" + rest_bod;
             }
+            break;
         case TemplateType::BrokenType:
             template_body = "BROKEN TYPE";
             break;
         default:
             return;
     }
+}
+
+void function::MaskTemplate::print_template(int depth) {
+    for(int i = 0; i < depth; i++){
+        std::cout << "|\t";
+    }
+    std::cout << template_body << std::endl;
+    if(First != nullptr) First->print_template(depth+1);
+    if(Rest != nullptr) Rest->print_template(depth+1);
 }
 
 

@@ -32,6 +32,7 @@ namespace function {
         explicit MaskTemplate(const PartiallyParsedString& template_string);
         explicit MaskTemplate();
         void count_body();
+        void print_template(int depth = 0);
 
     private:
         static bool check_skip_symbol(const std::string& template_string, function::TemplateType& type);
