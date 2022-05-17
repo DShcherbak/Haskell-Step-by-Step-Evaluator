@@ -10,11 +10,14 @@
 
 
 /*
- * !! DAta constructors (named or infix of prefix) should work same as list and tuple
- * TODO: [b] !!
  * TODO: Rename classes, maybe restructure
+ * TODO: Data structure parsing
+ * TODO: Parsing input into tree
+ * TODO: Do I need type checking using GHCI or can I just go on using my raw tree system
+ *
+ * !! Maybe save the type for a mask template tree?
  * !! Problem of 2 substitudes - no idea what it is
- * !! May need "incomplete data constructor" template type
+ * !! May need "incomplete data constructor" template type - but seems to work ok for now
  */
 namespace function {
 
@@ -59,6 +62,8 @@ namespace function {
         PartiallyParsedString substr(int start, int finish);
 
         static std::shared_ptr<MaskTemplate> parse_desugared_list(PartiallyParsedString parsedString);
+
+        static std::string postprocess_string(const std::string &line);
     };
 }
 

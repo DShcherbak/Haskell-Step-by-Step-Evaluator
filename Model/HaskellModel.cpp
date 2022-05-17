@@ -65,8 +65,7 @@ void HaskellModel::add_expression_to_function(const std::string& name, const lin
 
     std::shared_ptr<function::Mask> mask;
     if(guard_start < head_start){
-        head_start = guard_start;
-        std::string head = line.substr(0, head_start);
+        std::string head = line.substr(0, guard_start);
         mask = std::make_shared<function::Mask>(head);
         process_function_guards(mask, line, guard_start);
 

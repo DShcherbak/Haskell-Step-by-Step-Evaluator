@@ -32,6 +32,17 @@ namespace function {
         return result;
     }
 
+    std::string PartiallyParsedString::postprocess_string(const std::string &line) {
+        std::string result;
+        for (int i = 0, n = line.size(); i < n; i++) {
+            result += line[i];
+            if (line[i] == '$' && i + 1 < n && line[i+1] == '$') {
+                i++;
+            }
+        }
+        return result;
+    }
+
     std::vector<PartiallyParsedString> PartiallyParsedString::split_by_space(std::string line) {
         line = preprocess_string(line);
         std::vector<PartiallyParsedString> result{};
@@ -235,7 +246,7 @@ namespace function {
         //std::cout << line.line << std::endl;
         line = parse_internal_brackets(line);
         line = parse_sugared_lists(line);
-        if(line.line.find(',') != std::string::npos){
+        if(line.parenthesized == '[' || line.line.find(',') != std::string::npos){
             std::shared_ptr<function::MaskTemplate> result;
             auto list_elements = divide_pps_by(line, ',');
             auto constructed = construct_templates(list_elements);
@@ -361,8 +372,12 @@ namespace function {
             finish = (int) line.size();
         }
         for(int i = 0; i < start; i++){
-            if(line[i] == '$' && line[i+1] != '$')
-                j++;
+            if(line[i] == '$'){
+                if(line[i+1] != '$')
+                    j++;
+                else
+                    i++;
+            }
         }
         if(start > 0 && line[start-1] == '$' && line[start] == '$')
             start++;
@@ -390,6 +405,7 @@ namespace function {
             operator_val += parsedString.line[col];
             col++;
         }
+        operator_val = postprocess_string(operator_val);
         if(pre_col == '(' && parsedString.line[col] == ')'){
             //prefix data constructor
             first_half = parsedString.substr(col+1);
@@ -398,20 +414,20 @@ namespace function {
             result->type = TemplateType::DataConstructor;
             result->First = parse_line(pars[0]);
             result->Rest = parse_line(pars[1]);
-            result->template_body = "(" + operator_val + ") " + result->First->template_body + " " + result->Rest->template_body;
+            result->template_body = "(" + result->First->template_body + ") " +operator_val + " ("  + result->Rest->template_body + ")";
             return result;
         }
 
-        auto first_ptr = std::make_shared<function::MaskTemplate>(first_half);
+        auto first_ptr = parse_line(first_half);
         auto second_half = parsedString.substr(col);
-        auto second_ptr = std::make_shared<function::MaskTemplate>(second_half);
+        auto second_ptr = parse_line(second_half);
         auto result = std::make_shared<function::MaskTemplate>();
         result->type = TemplateType::DataConstructor;
         result->First = first_ptr;
         result->Rest = second_ptr;
         result->First->count_body();
         result->Rest->count_body();
-        result->template_body = result->First->template_body + operator_val + result->Rest->template_body;
+        result->template_body = "(" + result->First->template_body + ") " +operator_val + " ("  + result->Rest->template_body + ")";
         return result;
     }
 
