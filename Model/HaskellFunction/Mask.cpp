@@ -26,8 +26,6 @@ function::Mask::Mask(const std::string& mask_string) {
             temp->print_template();
         }
     }
-
-
 }
 
 void function::Mask::add_guard(const std::string &guard_head, const std::string &guard_body) {

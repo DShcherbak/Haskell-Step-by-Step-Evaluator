@@ -35,6 +35,13 @@ goodForAll3 (((:$) 3 4) :$$$ (1 :$ 2)) = 10
 goodForAll3 (((:$) 2.3 412345678009) :$$$ (1 :$ 2)) = 10
 goodForAll3 _ = 0
 
+doubleWhere :: Integral b => b -> b -> (b, Bool)
+doubleWhere a b = (x, t) where
+    x = y + 1 where
+        y = a ^ b
+    t = qq > 0 where
+        qq = a - b
+
 parsingNames (Left errorMsg) = Left ("Got error: " ++ errorMsg)
 parsingNames (Right (Just x)) = Right $ "Got result: " ++ show x
 parsingNames _ = Left "Something weird"

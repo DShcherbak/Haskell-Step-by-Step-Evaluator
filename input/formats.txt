@@ -1,0 +1,9 @@
+<expr> where <expr>             -- helping function declaration using where
+let <name> = <exp> in <exp>     -- helping function declaration using let
+if <exp> then <exp> else <exp>  -- if-then-else expression
+(<exp>, <exp>)                  -- tuple
+[<exp>, <exp>]                  -- list
+(<exp> : <exp> : <exp>)         -- linked list
+<Data> <exp> <exp>              -- Data structure
+<function_name> <exp> <exp>     -- function application
+<exp> <operator> <exp>          -- operation

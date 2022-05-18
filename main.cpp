@@ -13,7 +13,7 @@ int main() {
     auto files = getFilesToParse();
     for(auto &file : files){
         auto statements = fileParser.ParseFile(file);
-       haskellModel.AddStatements(statements);
+        haskellModel.AddStatements(statements);
     }
     return 0;
 }
