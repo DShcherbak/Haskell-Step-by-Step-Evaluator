@@ -11,9 +11,12 @@ myButLast :: [a] -> a
 myButLast (x:y:[]) = x
 myButLast (x:xs) = myButLast xs
 
---data Number1 = Int :+ Int
---data Number2 = Int :$ Int
---data Number3 = Number2 :$$$ Number2
+data Number1 = Int :+ Int
+data Number2 = Int :$ Int
+data Number2D = Double :$$ Double
+data Number3 = Number2 :$$$ Number2
+
+data SC = SomeCust Int Int Int | SomeCust' Int Int [Int]
 
 
 goodForNothing (1 :+ m, (('a', "(b,c)"),             ["d,e", _, n,
@@ -21,8 +24,8 @@ goodForNothing (1 :+ m, (('a', "(b,c)"),             ["d,e", _, n,
 goodForNothing _ = "doesn't parse..."
 
 good'N't' ('a':('b':"c   sdf (")) = "abc"
-good'N't' (1:(2:[3,4,5])) = "12345"
-good'N't' [3] = "--3--"
+good'N't' ('1':('2':['3','4','5'])) = "12345"
+good'N't' ['3'] = "--3--"
 good'N't' x = "---"
 
 goodForAll ((:+) 1 2) (3 :+ 4) = 10
@@ -31,9 +34,18 @@ goodForAll _ _ = 9
 goodForAll2 ((:$) 1 2) (3 :$ 4) = 9
 goodForAll2 _ _ = 10
 
-goodForAll3 (((:$) 3 4) :$$$ (1 :$ 2)) = 10
-goodForAll3 (((:$) 2.3 412345678009) :$$$ (1 :$ 2)) = 10
+goodForAll3 :: Either Number2D Number3 -> Int
+goodForAll3 (Right (((:$) 3 4) :$$$ (1 :$ 2))) = 10
+goodForAll3 (Left ((:$$) 2.3 412345678009)) = 10
 goodForAll3 _ = 0
+
+
+complexWhere :: Num a => a -> a -> a -> a
+complexWhere x y z = let a = t1 + t2 where t1 = x
+                                           t2 = y 
+                        in let b = t3 + a where t3 = z 
+                            in b ^ q where q = b2 - b1 - kk where b1 = 1; b2 = 2; kk = 1   
+                                           kk = 0
 
 doubleWhere :: Integral b => b -> b -> (b, Bool)
 doubleWhere a b = (x, t) where
