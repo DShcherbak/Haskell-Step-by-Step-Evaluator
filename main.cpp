@@ -12,7 +12,7 @@ int main() {
     lines::HaskellFileParser fileParser{};
     auto files = getFilesToParse();
     for(auto &file : files){
-        auto statements = fileParser.ParseFile(file);
+        auto statements = fileParser.parse_file(file);
         haskellModel.AddStatements(statements);
     }
     return 0;
