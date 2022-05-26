@@ -28,6 +28,10 @@ namespace lines {
         statement_vector compress_lines(const indent_vector& lines);
         indent_vector indentation(const std::vector<std::string> &lines);
         std::vector<std::string> get_lines_from_file(const std::string &file_name);
+
+        vector <IndentedLine> compress_lines1(const vector <lines::IndentedLine> &lines);
+
+        vector <IndentedLine> remove_comments(const vector <lines::IndentedLine> &lines);
     };
 }
 

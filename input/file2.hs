@@ -1,14 +1,41 @@
---module Main where
---import Data.Tuple (swap)
---import Data.List (insertBy)
+let1 x = let a = b + 1
+             b = x + 1
+             in let d = a + 1
+                    e = d + 1
+                        in e
+
+complexWhere :: Num a => a -> a -> a -> a
+complexWhere x y z = let a = t1 + t2 where t1 = x
+                                           t2 = y
+                        in let b = t3 + a where t3 = z
+                            in b ^ q where q = b2 - b1 - kk where b1 = 1; b2 = 2; kk = 1
+                                           kk = 0
+{-
+complexWhere x y z = let {a = t1 + t2 where{t1 = x;t2 = y}in let{b = t3 + a where{t3 = z}}in b ^ q where{q = b2 - b1 - kk where{b1 = 1; b2 = 2; kk = 1};kk = 0}
+                                           -}
+
+complexWhere' :: Num a => a -> a -> a -> a
+complexWhere' x y z = let{a = t1 + t2 where{t1 = x ;t2 = y}} in let{b = t3 + a where{t3 = z}} in b ^ q where{q = b2 - b1 - kk where{b1 = 1; b2 = 2; kk = 1} ;kk = 0}
+
+
+doubleWhere :: Integral b => b -> b -> (b, Bool)
+doubleWhere a b = (x, t) where
+    x = y + 1 where
+        y = a ^ b
+    t = qq > 0 where
+        qq = a - b
+
 
 myLast :: [a] -> a
-myLast (x:[]) = x
+myLast [] = error "Error"
+myLast [x] = x
 myLast (x:xs) =
     myLast xs
 
 myButLast :: [a] -> a
-myButLast (x:y:[]) = x
+myButLast [] = error "Error"
+myButLast [x] = error "Error"
+myButLast [x, y] = x
 myButLast (x:xs) = myButLast xs
 
 data Number1 = Int :+ Int
@@ -38,21 +65,6 @@ goodForAll3 :: Either Number2D Number3 -> Int
 goodForAll3 (Right (((:$) 3 4) :$$$ (1 :$ 2))) = 10
 goodForAll3 (Left ((:$$) 2.3 412345678009)) = 10
 goodForAll3 _ = 0
-
-
-complexWhere :: Num a => a -> a -> a -> a
-complexWhere x y z = let a = t1 + t2 where t1 = x
-                                           t2 = y 
-                        in let b = t3 + a where t3 = z 
-                            in b ^ q where q = b2 - b1 - kk where b1 = 1; b2 = 2; kk = 1   
-                                           kk = 0
-
-doubleWhere :: Integral b => b -> b -> (b, Bool)
-doubleWhere a b = (x, t) where
-    x = y + 1 where
-        y = a ^ b
-    t = qq > 0 where
-        qq = a - b
 
 parsingNames (Left errorMsg) = Left ("Got error: " ++ errorMsg)
 parsingNames (Right (Just x)) = Right $ "Got result: " ++ show x
