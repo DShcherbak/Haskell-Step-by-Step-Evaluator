@@ -1,3 +1,7 @@
+complexWhere' :: Num a => a -> a -> a -> a
+complexWhere' x y z = let{a = t1 + t2 where{t1 = x ;t2 = y}} in let{b = t3 + a where{t3 = z}} in b ^ q where{q = b2 - b1 - kk where{b1 = 1; b2 = 2; kk = 1} ;kk = 0}
+
+
 let1 x = let a = b + 1
              b = x + 1
              in let d = a + 1
@@ -10,12 +14,20 @@ complexWhere x y z = let a = t1 + t2 where t1 = x
                         in let b = t3 + a where t3 = z
                             in b ^ q where q = b2 - b1 - kk where b1 = 1; b2 = 2; kk = 1
                                            kk = 0
-{-
+{--
 complexWhere x y z = let {a = t1 + t2 where{t1 = x;t2 = y}in let{b = t3 + a where{t3 = z}}in b ^ q where{q = b2 - b1 - kk where{b1 = 1; b2 = 2; kk = 1};kk = 0}
                                            -}
 
-complexWhere' :: Num a => a -> a -> a -> a
-complexWhere' x y z = let{a = t1 + t2 where{t1 = x ;t2 = y}} in let{b = t3 + a where{t3 = z}} in b ^ q where{q = b2 - b1 - kk where{b1 = 1; b2 = 2; kk = 1} ;kk = 0}
+anotherTest x = let p = (x^2)in(+)p x 
+
+mixLetAndWhere x = let p = y where y = x + 1 in p
+
+closedAndUnclosedLet x = let {p = 3 ; d = let q = x in d} in p + d  
+
+complexLNW= let p = q where q = let{z = 1}in z in p 
+
+complexLNW' = let{p = q where{q = let{z = 1}in z }}in p 
+
 
 
 doubleWhere :: Integral b => b -> b -> (b, Bool)

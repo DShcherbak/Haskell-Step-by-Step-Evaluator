@@ -14,6 +14,8 @@ namespace lines{
         string original_line;
         int indentation;
         IndentedLine(const string& ind_line, const string& orig_line, int ind);
+
+        void insert_at(char c, size_t position, bool remove = false);
     };
 }
 

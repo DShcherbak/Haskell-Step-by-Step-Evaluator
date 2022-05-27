@@ -1,10 +1,11 @@
 #include <stack>
+#include <cassert>
 #include "HaskellFileParser.h"
 
 namespace lines {
 
     bool is_operator(char c){
-        return c == '=' || c == ';' || c == '{' || c == '}';
+        return c == '=' || c == ';' || c == '{' || c == '}' || c == '(' || c == ')';
     }
 
     bool is_spacy(char c){
@@ -13,57 +14,121 @@ namespace lines {
 
     string found_keyword(const std::string &line, size_t& id){
         size_t n = line.size();
-        if(!is_spacy(line[id]))
-            return "";
-        for(auto &key : std::vector<string>{"where", "let", "do"}){
+        if(line[id] == '}'){
+            return "}";
+        }
+
+        for(auto &key : std::vector<string>{"where", "let", "do", "in"}){
             size_t k = key.size();
-            if(id + k + 1 <= n && line.substr(id+1,k) == key && (id + k + 1 == n || is_spacy(line[id+k+1]))){
-            //    std::cout << line.substr(id+1,k) << "<==>" << key << std::endl;
-                id += k + 1;
-                return key;
+            if(id + k + 1 <= n && (id + k + 1 == n || is_spacy(line[id+k+1]))) {
+                if (line.substr(id + 1, k) == key) {
+                    if (key != "in")
+                        id += k + 1;
+                    else
+                        id++;
+                    return key;
+                }
+            } else if (id == 0 && id + k <= n && line.substr(id,k) == key && (id + k == n || is_spacy(line[id+k]))){
+                    if(key != "in")
+                        id += k;
+                    return key;
             }
         }
         return "";
     }
 
-    //special case : where ends the ongoing do-block (and let mean differently)
-    void recursively_parse_keyword(const string &key, indent_vector & lines_with_indentation, size_t &line_id, size_t &char_id){
-        size_t block_indent = 0;
+    std::string insert_at(const std::string& str, char c, size_t position, bool remove = false){
+        auto first_part = str.substr(0, position);
+        auto second_part = str.substr(position + (remove ? 1 : 0));
+        return first_part + c + second_part;
+    }
+
+    size_t count_block_indent(indent_vector & lines_with_indentation, size_t &line_id, size_t &char_id){
         auto line = lines_with_indentation[line_id].parsed_line;
         size_t n = line.size();
-        while(char_id < n && line[char_id] == ' ') ++char_id;
-        if(char_id < n){
-            if(line[char_id] == '{')
-                return;
+        if (char_id < n) {
+            if (line[char_id] == '{')
+                return 0;
             else {
-                lines_with_indentation[line_id].parsed_line = line.substr(0, char_id-1) + "{" + line.substr(char_id);
-                line = lines_with_indentation[line_id].parsed_line;
-                block_indent = lines_with_indentation[line_id].indentation + char_id;
+                lines_with_indentation[line_id].parsed_line = insert_at(line, '{', char_id-1, true); //line.substr(0, char_id - 1) + "{" + line.substr(char_id);
+                return lines_with_indentation[line_id].indentation + char_id; //+1?
             }
         } else {
             lines_with_indentation[line_id].parsed_line.append("{");
             line_id++;
-            block_indent = lines_with_indentation[line_id].indentation;
             char_id = 0;
+            return lines_with_indentation[line_id].indentation;
+        }
+    }
+
+    //returns true if found end of a "do" block or a "where" block and need to exit recursion
+    bool check_for_new_line_operators(const std::string& key, indent_vector & lines_with_indentation, size_t &line_id, size_t &char_id, size_t block_indent){
+        auto line = lines_with_indentation[line_id].parsed_line;
+        if(char_id == 0 && block_indent > 0){
+            if(lines_with_indentation[line_id].indentation == block_indent){
+                lines_with_indentation[line_id].insert_at(';', 0);//";" + lines_with_indentation[line_id].parsed_line;
+            }
+            else if(lines_with_indentation[line_id].indentation < block_indent){
+                if(key == "where" || key == "do"){
+                    --line_id;
+                    lines_with_indentation[line_id].parsed_line.append("}");
+                    char_id = lines_with_indentation[line_id].parsed_line.size()+2;//end of the line
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    //special case : where ends the ongoing do-block (and let mean differently)
+    void recursively_parse_keyword(const string &key, indent_vector & lines_with_indentation, size_t &line_id, size_t &char_id){
+        size_t block_indent = 0;
+        bool enclosed = false;
+        auto line = lines_with_indentation[line_id].parsed_line;
+        size_t n = line.size();
+        while(char_id < n && line[char_id] == ' ') ++char_id;
+        if(key != "in" && key != "}") {
+            block_indent = count_block_indent(lines_with_indentation, line_id, char_id);
+            enclosed = block_indent == 0;
         }
 
         for(size_t lines_n = lines_with_indentation.size(); line_id < lines_n; line_id++){
-            if(char_id == 0){
-                if(lines_with_indentation[line_id].indentation == block_indent){
-                    --lines_with_indentation[line_id].indentation;
-                    lines_with_indentation[line_id].parsed_line = ";" + lines_with_indentation[line_id].parsed_line;
-                }
-                else if(lines_with_indentation[line_id].indentation < block_indent){
-                    lines_with_indentation[line_id-1].parsed_line.append("}");
-                    --line_id;
-                    char_id = lines_with_indentation[line_id].parsed_line.size();
-                    return;
-                }
-            }
+            if (check_for_new_line_operators(key, lines_with_indentation, line_id, char_id, block_indent))
+                return;
+
             for(;char_id < lines_with_indentation[line_id].parsed_line.size(); char_id++){
+                line = lines_with_indentation[line_id].parsed_line;
                 string new_key = found_keyword(lines_with_indentation[line_id].parsed_line, char_id);
                 if(!new_key.empty()){
-                    recursively_parse_keyword(new_key, lines_with_indentation, line_id, char_id);
+                    if(new_key == "}"){
+                        if(enclosed){
+                            if(key == "let"){
+                                char_id++;
+                                lines_with_indentation[line_id].insert_at(' ', char_id);
+                                n = lines_with_indentation[line_id].parsed_line.size();
+                                while(char_id < n && lines_with_indentation[line_id].parsed_line[char_id] == ' ') ++char_id;
+                                new_key = found_keyword(lines_with_indentation[line_id].parsed_line, --char_id);
+                                //std::cout << "LINE: \"..." << lines_with_indentation[line_id].parsed_line.substr(char_id-6) << "\"\n";
+                               // std::cout << "FF: \"" << lines_with_indentation[line_id].parsed_line.substr(char_id,3) << "\"\n";
+                                assert(new_key == "in");
+                                char_id+=1;
+                            }
+                        } else {
+                            lines_with_indentation[line_id].insert_at('}', char_id); //line.substr(0,char_id) + "}" + line.substr(char_id);
+                            ++char_id;
+                        }
+                        return;
+                    } else if(new_key == "in"){
+                        lines_with_indentation[line_id].insert_at('}', char_id); // line.substr(0,char_id) + "}in" + line.substr(char_id+2);
+                        if(key == "let")
+                            ++char_id;
+                        else
+                            --char_id;
+                        return;
+                    } else {
+                        recursively_parse_keyword(new_key, lines_with_indentation, line_id, char_id);
+                    }
                 }
             }
             char_id = 0;
@@ -74,7 +139,6 @@ namespace lines {
 
     indent_vector remove_sugar_from_where(indent_vector &lines_with_indentation){
         for(size_t line_id = 0, lines_n = lines_with_indentation.size(); line_id < lines_n; line_id++){
-            auto line_with_ind = lines_with_indentation[line_id];
             for(size_t char_id = 0; char_id < lines_with_indentation[line_id].parsed_line.size(); char_id++){
                 string key = found_keyword(lines_with_indentation[line_id].parsed_line, char_id);
                 if(!key.empty()){
