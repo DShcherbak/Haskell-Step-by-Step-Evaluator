@@ -62,14 +62,15 @@ namespace lines {
     }
 
     //returns true if found end of a "do" block or a "where" block and need to exit recursion
-    bool check_for_new_line_operators(const std::string& key, indent_vector & lines_with_indentation, size_t &line_id, size_t &char_id, size_t block_indent){
+    bool check_for_new_line_operators(const std::string& key, indent_vector & lines_with_indentation, size_t &line_id, size_t &char_id, size_t block_indent, int do_let_special_case){
         auto line = lines_with_indentation[line_id].parsed_line;
         if(char_id == 0 && block_indent > 0){
             if(lines_with_indentation[line_id].indentation == block_indent){
                 lines_with_indentation[line_id].insert_at(';', 0);//";" + lines_with_indentation[line_id].parsed_line;
             }
             else if(lines_with_indentation[line_id].indentation < block_indent){
-                if(key == "where" || key == "do"){
+                if(key == "where" || key == "do" ||
+                        (key == "let" && do_let_special_case > 0 && lines_with_indentation[line_id].indentation == do_let_special_case)){
                     --line_id;
                     lines_with_indentation[line_id].parsed_line.append("}");
                     char_id = lines_with_indentation[line_id].parsed_line.size()+2;//end of the line
@@ -82,7 +83,9 @@ namespace lines {
 
 
     //special case : where ends the ongoing do-block (and let mean differently)
-    void recursively_parse_keyword(const string &key, indent_vector & lines_with_indentation, size_t &line_id, size_t &char_id){
+    void recursively_parse_keyword(const string &key, indent_vector &lines_with_indentation, size_t &line_id,
+                                   size_t &char_id,
+                                   int do_let_special = 0) {
         size_t block_indent = 0;
         bool enclosed = false;
         auto line = lines_with_indentation[line_id].parsed_line;
@@ -94,11 +97,10 @@ namespace lines {
         }
 
         for(size_t lines_n = lines_with_indentation.size(); line_id < lines_n; line_id++){
-            if (check_for_new_line_operators(key, lines_with_indentation, line_id, char_id, block_indent))
+            if (check_for_new_line_operators(key, lines_with_indentation, line_id, char_id, block_indent, do_let_special))
                 return;
 
             for(;char_id < lines_with_indentation[line_id].parsed_line.size(); char_id++){
-                line = lines_with_indentation[line_id].parsed_line;
                 string new_key = found_keyword(lines_with_indentation[line_id].parsed_line, char_id);
                 if(!new_key.empty()){
                     if(new_key == "}"){
@@ -108,27 +110,47 @@ namespace lines {
                                 lines_with_indentation[line_id].insert_at(' ', char_id);
                                 n = lines_with_indentation[line_id].parsed_line.size();
                                 while(char_id < n && lines_with_indentation[line_id].parsed_line[char_id] == ' ') ++char_id;
+                                if(char_id == n){
+                                    line_id++;
+                                    char_id = 1;//misss ; because of this
+                                }
                                 new_key = found_keyword(lines_with_indentation[line_id].parsed_line, --char_id);
-                                //std::cout << "LINE: \"..." << lines_with_indentation[line_id].parsed_line.substr(char_id-6) << "\"\n";
-                               // std::cout << "FF: \"" << lines_with_indentation[line_id].parsed_line.substr(char_id,3) << "\"\n";
-                                assert(new_key == "in");
+                                //std::cout << "LINE: \"" << lines_with_indentation[line_id].parsed_line.substr(char_id)<< "\"\n";
+                                //std::cout << "IN: \"" << lines_with_indentation[line_id].parsed_line.substr(char_id, 3) <<  "\"\n";
+                                if(new_key != "in")
+                                    lines_with_indentation[line_id].insert_at(';',0);
                                 char_id+=1;
                             }
-                        } else {
-                            lines_with_indentation[line_id].insert_at('}', char_id); //line.substr(0,char_id) + "}" + line.substr(char_id);
+                        } else { //DO can't be inside of a {}, can It?
+                                // Can a let inside a do have more lets and wheres, and
+                            lines_with_indentation[line_id].insert_at('}', char_id);
                             ++char_id;
                         }
                         return;
-                    } else if(new_key == "in"){
-                        lines_with_indentation[line_id].insert_at('}', char_id); // line.substr(0,char_id) + "}in" + line.substr(char_id+2);
-                        if(key == "let")
-                            ++char_id;
-                        else
-                            --char_id;
-                        return;
                     } else {
-                        recursively_parse_keyword(new_key, lines_with_indentation, line_id, char_id);
+                        if(key == "do"){
+                            if(new_key == "let"){
+                                recursively_parse_keyword(new_key, lines_with_indentation, line_id, char_id, block_indent);
+                            } else {
+                                lines_with_indentation[line_id].insert_at('}', char_id-new_key.size());
+                                char_id += 2; // TOTAL MISTERY, but where after do breaks without it
+                                recursively_parse_keyword(new_key, lines_with_indentation, line_id, char_id);
+                                return;
+                            }
+                        } else {
+                            if (new_key == "in") {
+                                lines_with_indentation[line_id].insert_at('}', char_id);
+                                if (key == "let")
+                                    ++char_id;
+                                else
+                                    --char_id;
+                                return;
+                            } else {
+                                recursively_parse_keyword(new_key, lines_with_indentation, line_id, char_id, do_let_special);
+                            }
+                        }
                     }
+
                 }
             }
             char_id = 0;

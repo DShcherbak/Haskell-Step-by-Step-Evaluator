@@ -1,6 +1,24 @@
 complexWhere' :: Num a => a -> a -> a -> a
 complexWhere' x y z = let{a = t1 + t2 where{t1 = x ;t2 = y}} in let{b = t3 + a where{t3 = z}} in b ^ q where{q = b2 - b1 - kk where{b1 = 1; b2 = 2; kk = 1} ;kk = 0}
 
+doWithWhere :: IO ()
+doWithWhere = do
+    let {x = 2} 
+        in print x
+    let x = let 
+            p = 4 in p
+
+    let {y = 4}
+    print (x+y+z)
+        where
+            z = q
+            q = r
+            r = 1
+
+
+
+letConfused = let p = 3 
+    in p * p
 
 let1 x = let a = b + 1
              b = x + 1
