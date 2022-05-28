@@ -18,7 +18,7 @@ namespace lines {
             return "}";
         }
 
-        for(auto &key : std::vector<string>{"where", "let", "do", "in"}){
+        for(auto &key : std::vector<string>{"where", "let", "do", "in", "of"}){
             size_t k = key.size();
             if(is_spacy(line[id])
                     && id + k + 1 <= n
@@ -71,7 +71,7 @@ namespace lines {
                 lines_with_indentation[line_id].insert_at(';', 0);//";" + lines_with_indentation[line_id].parsed_line;
             }
             else if(lines_with_indentation[line_id].indentation < block_indent){
-                if(key == "where" || key == "do" ||
+                if(key == "where" || key == "do" || key == "of" || 
                         (key == "let" && do_let_special_case > 0 && lines_with_indentation[line_id].indentation == do_let_special_case)){
                     --line_id;
                     lines_with_indentation[line_id].parsed_line.append("}");

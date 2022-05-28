@@ -12,7 +12,15 @@ main = do
 
 infixr 6 +.+
 (+.+) :: Double  -> Double -> Double 
-(+.+) x y = x + x + y + y 
+(+.+) x y = x + x + y + y
+
+
+testCaseForCase :: Maybe (Maybe [Char]) -> [Char]
+testCaseForCase x = case x of 
+    Nothing -> "Nothing"
+    Just x -> case x of 
+        Nothing -> "Just Nothing"
+        Just y -> "Just Just " ++ y 
 
 useDataList :: [Integer] -> Integer
 useDataList = Data.Bue.foldl (+) 0.Data.Bue.map (+1).Data.Bue.fromList 

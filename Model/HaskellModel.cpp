@@ -1,6 +1,4 @@
 #include "HaskellModel.h"
-#include "../Lexer/Lexer.h"
-#include "../Exception/IncorrectTokenException.h"
 
 void HaskellModel::AddStatements(std::vector<string> &statements) {
     auto token_tree_vector = Lexer::functions_to_tokens(statements);
@@ -29,16 +27,39 @@ void HaskellModel::function_type_define(const std::string& name, const lines::Li
   //  auto func = GetOrCreateFunction(name);
   //  func->add_mask(mask);
 
-void HaskellModel::process_functions(const std::vector<lines::LineStatement> &statements) {
 
+std::vector<TokenTree> HaskellModel::process_functions(const std::vector<TokenTree> &trees) {
+    std::vector<TokenTree> filtered;
+    for(auto & tree : trees){
+        if(tree.children[0].which() == 1){
+            std::string name = get<std::string>(tree.children[0]);
+            if(name == "data"){
+                add_data_structure(tree);
+            } else { //TODO: type, newtype, ???
+                filtered.emplace_back(tree);
+            }
+        } else {
+            filtered.emplace_back(tree);
+        }
+    }
+    return filtered;
 }
 
-std::vector<lines::LineStatement> HaskellModel::process_type_classes(const std::vector<lines::LineStatement> &statements) {
- //   std::pair<statement_vector, statement_vector> filtered = filter_by_prefixes(statements, type_prefixes);
-
-    //TODO : Do something with type classes
-
- //   return filtered.second;
+std::vector<TokenTree> HaskellModel::process_type_classes(const std::vector<TokenTree> &trees) {
+    std::vector<TokenTree> filtered;
+    for(auto & tree : trees){
+        if(tree.children[0].which() == 1){
+            std::string name = get<std::string>(tree.children[0]);
+            if(name == "data"){
+                add_data_structure(tree);
+            } else { //TODO: type, newtype, ???
+                filtered.emplace_back(tree);
+            }
+        } else {
+            filtered.emplace_back(tree);
+        }
+    }
+    return filtered;
 }
 
 std::vector<TokenTree> HaskellModel::process_data_types(const std::vector<TokenTree> &trees) {
@@ -68,7 +89,7 @@ std::vector<TokenTree> HaskellModel::process_headers(const std::vector<TokenTree
                 try{
                     setName(get<std::string>(tree.children[1]));
                 } catch(std::exception& ex){
-                    throw IncorrectTokenException(get<TokenTree>(tree.children[1]), "Module name is");
+                  //  throw IncorrectTokenException(get<TokenTree>(tree.children[1]), "Module name is");
                 }
             } else if (name == "import"){
                 addImportToModel(tree.children);
