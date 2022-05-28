@@ -36,32 +36,38 @@ namespace parser {
             little = char_("a-z") | char_('_');
             Big = char_("A-Z");
             identifier = little >> *char_("_'a-zA-Z0-9");
+            Data_identifier = Big >> *char_("_'.a-zA-Z0-9");
 
             integer = +char_("0-9");
             floater = integer >> char_('.') >> integer;
-            Data_identifier = Big >> *char_("_'.a-zA-Z0-9");
+
             char_literal = lexeme['\'' >> ((char_('\\')[push_back(_val, _1)] >> char_[push_back(_val, _1)]) ||
                                            (char_ - char_('\''))[push_back(_val, _1)]) >> '\''];
             string_literal = lexeme['"' >> *(char_('\\')[push_back(_val, _1)] >> char_[push_back(_val, _1)] ||
                                              (char_ - char_('"'))[push_back(_val, _1)] ||
                                              (char_ - char_('\"'))[push_back(_val, _1)]) >> '"'];
-            plain = string_literal[_val = '"' + _1 + '"'] | char_literal[_val = "'" + _1 + "'"] |
-                    (Data_identifier | identifier | floater)[_val = _1]
-                    | integer[_val = _1]; //[_val = "'" + _1 + "'"]
+
+            plain = string_literal[_val = '"' + _1 + '"']
+                    | char_literal[_val = "'" + _1 + "'"]
+                    | (Data_identifier | identifier | floater)[_val = _1]
+                    | integer[_val = _1];
+
             operator_char = char_("+,:*^$|/=.`<>;") | //TODO: every operator (Look up from Haskell Report)
-                            char_('-');//"+" | lit('-') | lit('/') | lit(':') | lit('*') | lit('^');  //=
+                            char_('-');
             operator_string = +operator_char;
+
             list = '[' >> -(just_plain_iders)[_val = _1] >> ']' >> eps[push_back(at_c<0>(_val), "[]")];
             curly = '(' >> -(just_plain_iders)[_val = _1] >> ')' >> eps[push_back(at_c<0>(_val), "()")];
             silly = '{' >> -(just_plain_iders)[_val = _1] >> '}' >> eps[push_back(at_c<0>(_val), "{}")];
+
             node = list
                     | curly
                     | silly
                     | operator_string | plain;
             just_plain_iders = *(char_(' ')) >> node[push_back(at_c<0>(_val), _1)]
                                              >> *(*(char_(' ')) >> node[push_back(at_c<0>(_val), _1)]) >> *(char_(' '));
-            //     csvs = node[push_back(at_c<0>(_val), _1)] % ',';
-            expression = just_plain_iders; //;csvs ;
+
+            expression = just_plain_iders;
 
         }
 
@@ -70,14 +76,15 @@ namespace parser {
         qi::rule<Iterator, TokenTree(), qi::locals<std::string>> list;
         qi::rule<Iterator, TokenTree(), qi::locals<std::string>> curly;
         qi::rule<Iterator, TokenTree(), qi::locals<std::string>> silly;
-        qi::rule<Iterator, std::string(), qi::locals<std::string>> plain;
-        qi::rule<Iterator, std::string(), qi::locals<std::string>> operator_string;
-        qi::rule<Iterator, char(), qi::locals<std::string>> operator_char;
 
         qi::rule<Iterator, TokenNode(), qi::locals<std::string>> node;
+
+        qi::rule<Iterator, char(), qi::locals<std::string>> operator_char;
         qi::rule<Iterator, char(), qi::locals<std::string>> little;
         qi::rule<Iterator, char(), qi::locals<std::string>> Big;
 
+        qi::rule<Iterator, std::string(), qi::locals<std::string>> plain;
+        qi::rule<Iterator, std::string(), qi::locals<std::string>> operator_string;
         qi::rule<Iterator, std::string(), qi::locals<std::string>> identifier;
         qi::rule<Iterator, std::string(), qi::locals<std::string>> integer;
         qi::rule<Iterator, std::string(), qi::locals<std::string>> floater;
