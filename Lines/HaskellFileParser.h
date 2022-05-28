@@ -22,14 +22,13 @@ namespace lines {
     class HaskellFileParser {
     public:
         HaskellFileParser()= default;
-        statement_vector parse_file(const std::string& file_name);
+
+        std::vector<std::string> parse_file(const std::string& file_name);
     private:
         std::vector<std::string> preprocess_lines(const std::vector<string> &lines);
-        statement_vector compress_lines(const indent_vector& lines);
         indent_vector indentation(const std::vector<std::string> &lines);
         std::vector<std::string> get_lines_from_file(const std::string &file_name);
-
-        vector <IndentedLine> compress_lines1(const vector <lines::IndentedLine> &lines);
+        static vector <std::string> compress_lines(const vector <lines::IndentedLine> &lines);
 
         vector <IndentedLine> remove_comments(const vector <lines::IndentedLine> &lines);
     };

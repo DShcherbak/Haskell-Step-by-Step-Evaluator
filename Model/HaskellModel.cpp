@@ -1,10 +1,12 @@
 #include "HaskellModel.h"
+#include "../Lexer/Lexer.h"
 
-void HaskellModel::AddStatements(std::vector<lines::LineStatement> &statements) {
-    statements = process_headers(statements);
-    statements = process_data_types(statements);
-    statements = process_type_classes(statements);
-    process_functions(statements);
+void HaskellModel::AddStatements(std::vector<string> &statements) {
+    auto result = Lexer::try_parse(statements);
+   // statements = process_headers(statements);
+   // statements = process_data_types(statements);
+   // statements = process_type_classes(statements);
+   // process_functions(statements);
     std::cout << functions.size() << std::endl;
     std::cout << functions.size() << std::endl;
 }

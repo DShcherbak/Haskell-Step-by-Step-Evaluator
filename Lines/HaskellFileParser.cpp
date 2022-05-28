@@ -62,7 +62,7 @@ namespace lines {
     }
 
     //returns true if found end of a "do" block or a "where" block and need to exit recursion
-    bool check_for_new_line_operators(const std::string& key, indent_vector & lines_with_indentation, size_t &line_id, size_t &char_id, size_t block_indent, int do_let_special_case){
+    bool check_for_new_line_operators(const std::string& key, indent_vector & lines_with_indentation, size_t &line_id, size_t &char_id, size_t block_indent, size_t do_let_special_case){
         auto line = lines_with_indentation[line_id].parsed_line;
         if(char_id == 0 && block_indent > 0){
             if(lines_with_indentation[line_id].indentation == block_indent){
@@ -85,7 +85,7 @@ namespace lines {
     //special case : where ends the ongoing do-block (and let mean differently)
     void recursively_parse_keyword(const string &key, indent_vector &lines_with_indentation, size_t &line_id,
                                    size_t &char_id,
-                                   int do_let_special = 0) {
+                                   size_t do_let_special = 0) {
         size_t block_indent = 0;
         bool enclosed = false;
         auto line = lines_with_indentation[line_id].parsed_line;
@@ -173,7 +173,7 @@ namespace lines {
         return lines_with_indentation;
     }
 
-    statement_vector HaskellFileParser::parse_file(const std::string &file_name) {
+    std::vector<std::string> HaskellFileParser::parse_file(const std::string &file_name) {
         std::vector<std::string> lines;
         lines = get_lines_from_file(file_name);
         lines = preprocess_lines(lines);
@@ -181,11 +181,11 @@ namespace lines {
         indent_vector lines_with_indentation = indentation(lines);
         indent_vector lines_without_comments = remove_comments(lines_with_indentation);
         indent_vector lines_with_desugared_where = remove_sugar_from_where(lines_without_comments);
-        indent_vector statements = compress_lines1(lines_with_desugared_where);
-        for(auto &l : statements){
-            std::cout << l.parsed_line << std::endl;
+        std::vector<string> statements = compress_lines(lines_with_desugared_where);
+        for(auto &st : statements){
+            std::cout << st << std::endl;
         }
-        return {};
+        return statements;
     }
 
     
@@ -295,26 +295,17 @@ namespace lines {
         return result;
     }
 
-    indent_vector HaskellFileParser::compress_lines1(const indent_vector &lines) {
-        indent_vector result;
+    std::vector<std::string> HaskellFileParser::compress_lines(const indent_vector &lines) {
+        std::vector<std::string> result;
         size_t i = 0, j = 0, n = lines.size();
         while(i < n){
-            result.emplace_back(lines[i++]);
+            result.emplace_back(lines[i++].parsed_line);
             while(i < n && lines[i].indentation > 0)
-                result[j].parsed_line.append(" " + lines[i++].parsed_line);
+                result[j].append(" " + lines[i++].parsed_line);
             j++;
         }
         return result;
     }
 
-    statement_vector HaskellFileParser::compress_lines(const indent_vector &lines) {
-        size_t cur_line = 0, compressed_line_id = 0, next_line = 0, n = lines.size();
-
-        LineParser parser = LineParser();
-        for (auto &line: lines) {
-            parser.parse_line(line);
-        }
-        return parser.get_result();
-    }
 
 }

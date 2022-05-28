@@ -19,4 +19,10 @@ add_executable(Haskell_Step_by_Step_Evaluator main.cpp
         Model/HaskellFunction/Body.cpp Model/HaskellFunction/Body.h
         Model/HaskellFunction/MaskTemplate.cpp Model/HaskellFunction/MaskTemplate.h
 
-        Parsing/parsing.cpp Parsing/parsing.h Parsing/PartiallyParsedString.cpp Parsing/PartiallyParsedString.h)
+        Parsing/parsing.cpp Parsing/parsing.h
+        Parsing/PartiallyParsedString.cpp Parsing/PartiallyParsedString.h
+
+        Lexer/Lexer.cpp Lexer/Lexer.h
+        Lexer/expression_tree.h Lexer/expression_tree.cpp
+        Lexer/Lexer.h Lexer/Lexer.cpp
+        Lexer/expr_grammar.h)

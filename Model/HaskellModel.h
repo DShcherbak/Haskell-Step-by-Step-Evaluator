@@ -13,7 +13,7 @@
 
 class HaskellModel {
 public:
-    void AddStatements(statement_vector& statements);
+    void AddStatements(std::vector<string> &statements);
 
 
 private:
