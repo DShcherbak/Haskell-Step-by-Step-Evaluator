@@ -83,70 +83,70 @@ namespace lines {
 
 
     //special case : where ends the ongoing do-block (and let mean differently)
-    void recursively_parse_keyword(const string &key, indent_vector &lines_with_indentation, size_t &line_id,
+    void recursively_parse_keyword(const string &key, indent_vector &lines, size_t &line_id,
                                    size_t &char_id,
                                    size_t do_let_special = 0) {
         size_t block_indent = 0;
         bool enclosed = false;
-        auto line = lines_with_indentation[line_id].parsed_line;
+        auto line = lines[line_id].parsed_line;
         size_t n = line.size();
         while(char_id < n && line[char_id] == ' ') ++char_id;
         if(key != "in" && key != "}") {
-            block_indent = count_block_indent(lines_with_indentation, line_id, char_id);
+            block_indent = count_block_indent(lines, line_id, char_id);
             enclosed = block_indent == 0;
         }
 
-        for(size_t lines_n = lines_with_indentation.size(); line_id < lines_n; line_id++){
-            if (check_for_new_line_operators(key, lines_with_indentation, line_id, char_id, block_indent, do_let_special))
+        for(size_t lines_n = lines.size(); line_id < lines_n; line_id++){
+            if (check_for_new_line_operators(key, lines, line_id, char_id, block_indent, do_let_special))
                 return;
 
-            for(;char_id < lines_with_indentation[line_id].parsed_line.size(); char_id++){
-                string new_key = found_keyword(lines_with_indentation[line_id].parsed_line, char_id);
+            for(; char_id < lines[line_id].parsed_line.size(); char_id++){
+                string new_key = found_keyword(lines[line_id].parsed_line, char_id);
                 if(!new_key.empty()){
                     if(new_key == "}"){
                         if(enclosed){
                             if(key == "let"){
                                 char_id++;
-                                lines_with_indentation[line_id].insert_at(' ', char_id);
-                                n = lines_with_indentation[line_id].parsed_line.size();
-                                while(char_id < n && lines_with_indentation[line_id].parsed_line[char_id] == ' ') ++char_id;
+                                lines[line_id].insert_at(' ', char_id);
+                                n = lines[line_id].parsed_line.size();
+                                while(char_id < n && lines[line_id].parsed_line[char_id] == ' ') ++char_id;
                                 if(char_id == n){
                                     line_id++;
                                     char_id = 1;//misss ; because of this
                                 }
-                                new_key = found_keyword(lines_with_indentation[line_id].parsed_line, --char_id);
-                                //std::cout << "LINE: \"" << lines_with_indentation[line_id].parsed_line.substr(char_id)<< "\"\n";
-                                //std::cout << "IN: \"" << lines_with_indentation[line_id].parsed_line.substr(char_id, 3) <<  "\"\n";
+                                new_key = found_keyword(lines[line_id].parsed_line, --char_id);
+                                //std::cout << "LINE: \"" << lines[line_id].parsed_line.substr(char_id)<< "\"\n";
+                                //std::cout << "IN: \"" << lines[line_id].parsed_line.substr(char_id, 3) <<  "\"\n";
                                 if(new_key != "in")
-                                    lines_with_indentation[line_id].insert_at(';',0);
+                                    lines[line_id].insert_at(';', 0);
                                 char_id+=1;
                             }
                         } else { //DO can't be inside of a {}, can It?
                                 // Can a let inside a do have more lets and wheres, and
-                            lines_with_indentation[line_id].insert_at('}', char_id);
+                            lines[line_id].insert_at('}', char_id);
                             ++char_id;
                         }
                         return;
                     } else {
                         if(key == "do"){
                             if(new_key == "let"){
-                                recursively_parse_keyword(new_key, lines_with_indentation, line_id, char_id, block_indent);
+                                recursively_parse_keyword(new_key, lines, line_id, char_id, block_indent);
                             } else {
-                                lines_with_indentation[line_id].insert_at('}', char_id-new_key.size());
+                                lines[line_id].insert_at('}', char_id - new_key.size());
                                 char_id += 2; // TOTAL MISTERY, but where after do breaks without it
-                                recursively_parse_keyword(new_key, lines_with_indentation, line_id, char_id);
+                                recursively_parse_keyword(new_key, lines, line_id, char_id);
                                 return;
                             }
                         } else {
                             if (new_key == "in") {
-                                lines_with_indentation[line_id].insert_at('}', char_id);
+                                lines[line_id].insert_at('}', char_id);
                                 if (key == "let")
                                     ++char_id;
                                 else
                                     --char_id;
                                 return;
                             } else {
-                                recursively_parse_keyword(new_key, lines_with_indentation, line_id, char_id, do_let_special);
+                                recursively_parse_keyword(new_key, lines, line_id, char_id, do_let_special);
                             }
                         }
                     }
@@ -155,8 +155,7 @@ namespace lines {
             }
             char_id = 0;
         }
-
-
+        lines[line_id-1].parsed_line.append("}");
     }
 
     indent_vector remove_sugar_from_where(indent_vector &lines_with_indentation){
@@ -168,8 +167,6 @@ namespace lines {
                 }
             }
         }
-
-
         return lines_with_indentation;
     }
 
@@ -182,13 +179,11 @@ namespace lines {
         indent_vector lines_without_comments = remove_comments(lines_with_indentation);
         indent_vector lines_with_desugared_where = remove_sugar_from_where(lines_without_comments);
         std::vector<string> statements = compress_lines(lines_with_desugared_where);
-    //    for(auto &st : statements){
-    //        std::cout << st << std::endl;
-    //    }
+/*        for(auto &st : statements){
+            std::cout << st << std::endl;
+        }*/
         return statements;
     }
-
-    
 
 
     std::vector<std::string> HaskellFileParser::get_lines_from_file(const std::string &file_name) {
@@ -245,19 +240,6 @@ namespace lines {
             if (i == n)
                 continue;
             new_string += line.substr(i);
-            /*
-            while (i < n) {
-                if (line[i] == ' ') {
-                    new_string += ' ';
-                    while (line[i] == ' ') {
-                        i++;
-                    }
-                } else if (line[i] == '-' && i < n - 1 && line[i + 1] == '-') {
-                    break;
-                } else {
-                    new_string += line[i++];
-                }
-            }*/
             result.emplace_back(new_string, line, ident);
         }
         return result;
@@ -266,6 +248,7 @@ namespace lines {
     indent_vector HaskellFileParser::remove_comments(const indent_vector &lines) {
         indent_vector result;
         size_t nested_comments = 0;
+        bool inside_string_literal = false;
         for (auto &l: lines) {
             auto line = l.parsed_line;
 
@@ -277,17 +260,33 @@ namespace lines {
             result_str.parsed_line = "";
             size_t i = 0, n = line.size();
             while (i < n) {
-                if (line[i] == '-' && i < n - 1 && line[i + 1] == '-') {
-                    break;
-                } else if (line[i] == '{' && i < n - 1 && line[i + 1] == '-') {
-                    nested_comments++;
-                    i+=2;
-                } else if (line[i] == '-' && i < n - 1 && line[i + 1] == '}') {
-                    nested_comments--;
-                    i+=2;
-                }else if (nested_comments == 0){
+                if(inside_string_literal){
+                    if(line[i] == '"' && line[i-1] != '\\'){
+                        inside_string_literal = false;
+                    }
                     result_str.parsed_line += line[i++];
-                } else {i++;}
+                } else if(nested_comments > 0){
+                    if (line[i] == '{' && i < n - 1 && line[i + 1] == '-') {
+                        nested_comments++;
+                        i+=2;
+                    } else if (line[i] == '-' && i < n - 1 && line[i + 1] == '}') {
+                        nested_comments--;
+                        i+=2;
+                    } else {
+                        i++;
+                    }
+                } else {
+                    if (line[i] == '{' && i < n - 1 && line[i + 1] == '-') {
+                        nested_comments++;
+                        i+=2;
+                    } else  if (line[i] == '-' && i < n - 1 && line[i + 1] == '-') {
+                        break;
+                    } else {
+                        if(line[i] == '"' && (i == 0 || line[i-1] != '\\'))
+                            inside_string_literal = true;
+                        result_str.parsed_line += line[i++];
+                    }
+                }
             }
             if(!result_str.parsed_line.empty())
                 result.emplace_back(result_str);

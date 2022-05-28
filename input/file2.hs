@@ -1,3 +1,11 @@
+good'N't' ('a':('b':"c   sdf (")) = "abc"
+good'N't' ('1':('2':['3','4','5'])) = "12345"
+good'N't' ['3'] = "--3--"
+good'N't' x = "---"
+
+hardComment "{-" = "{-" {- -- hello a {- tricccccky -} comment here -}
+            ++ "{-"
+
 complexWhere' :: Num a => a -> a -> a -> a
 complexWhere' x y z = let{a = t1 + t2 where{t1 = x ;t2 = y}} in let{b = t3 + a where{t3 = z}} in b ^ q where{q = b2 - b1 - kk where{b1 = 1; b2 = 2; kk = 1} ;kk = 0}
 
@@ -79,11 +87,6 @@ data SC = SomeCust Int Int Int | SomeCust' Int Int [Int]
 goodForNothing (1 :+ m, (('a', "(b,c)"),             ["d,e", _, n,
             '(' : 'f' : ",g)"], "( asd)" )) = "PARSED!"
 goodForNothing _ = "doesn't parse..."
-
-good'N't' ('a':('b':"c   sdf (")) = "abc"
-good'N't' ('1':('2':['3','4','5'])) = "12345"
-good'N't' ['3'] = "--3--"
-good'N't' x = "---"
 
 goodForAll ((:+) 1 2) (3 :+ 4) = 10
 goodForAll _ _ = 9

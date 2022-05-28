@@ -60,11 +60,13 @@ void mini_xml_printer::operator()(expression_tree const& xml) const
 
 std::vector<expression_tree> Lexer::try_parse(const std::vector<std::string>& text) {
     namespace qi = boost::spirit::qi;
-    typedef parser::mini_xml_grammar<std::string::const_iterator> expr_grammar;
+    typedef parser::simple_expression_grammar<std::string::const_iterator> expr_grammar;
 
     expr_grammar grammar;
 
     std::vector<expression_tree> result;
+
+    //TODO: Change to exception if function not parsed
 
     for(auto line : text){
         if(line.empty())
