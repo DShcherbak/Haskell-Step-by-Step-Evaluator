@@ -1,11 +1,23 @@
---module Main where
+module Main where
 import qualified Data.Set as Data.Bue
-     
-{-main :: IO()
-main = do
-    print "Hello, HSSE"-}
+import Data.List ( sort )
 
+--[1,2,3]
+mySort :: [Int] -> [Int]
+mySort = sort 
+     
+main :: IO()
+main = do
+    print "Hello, HSSE"
+
+infixr 6 +.+
+(+.+) :: Double  -> Double -> Double 
+(+.+) x y = x + x + y + y 
+
+useDataList :: [Integer] -> Integer
 useDataList = Data.Bue.foldl (+) 0.Data.Bue.map (+1).Data.Bue.fromList 
+
+useDataList' :: Data.Bue.Set Double -> Double
 useDataList' = Data.Bue.foldl (+.+) 2.3 . Data.Bue.map (+5)
 
 

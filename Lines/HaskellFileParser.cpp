@@ -20,7 +20,9 @@ namespace lines {
 
         for(auto &key : std::vector<string>{"where", "let", "do", "in"}){
             size_t k = key.size();
-            if(id + k + 1 <= n && (id + k + 1 == n || is_spacy(line[id+k+1]))) {
+            if(is_spacy(line[id])
+                    && id + k + 1 <= n
+                    && (id + k + 1 == n || is_spacy(line[id+k+1]))) {
                 if (line.substr(id + 1, k) == key) {
                     if (key != "in")
                         id += k + 1;
