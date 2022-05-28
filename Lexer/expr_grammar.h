@@ -7,7 +7,7 @@
 #include <boost/phoenix/operator.hpp>
 #include <boost/phoenix/fusion.hpp>
 #include <boost/phoenix/stl.hpp>
-#include "expression_tree.h"
+#include "TokenTree.h"
 
 namespace qi = boost::spirit::qi;
 using boost::spirit::ascii::space_type;
@@ -22,12 +22,13 @@ namespace parser {
 
     template <typename Iterator>
     struct simple_expression_grammar
-            : qi::grammar<Iterator, expression_tree(), qi::locals<std::string>> {
+            : qi::grammar<Iterator, TokenTree(), qi::locals<std::string>> {
         simple_expression_grammar()
                 : simple_expression_grammar::base_type(expression) {
             using qi::lit;
             using phoenix::push_back;
             using qi::lexeme;
+            using qi::eps;
             using ascii::char_;
             using ascii::string;
             using namespace qi::labels;
@@ -47,10 +48,13 @@ namespace parser {
             operator_char = char_("+,:*^$|/=.`<>;") | //TODO: every operator (Look up from Haskell Report)
                             char_('-');//"+" | lit('-') | lit('/') | lit(':') | lit('*') | lit('^');  //=
             operator_string = +operator_char;
-            list = '[' >> -(just_plain_iders)[_val = _1] >> ']';
-            curly = '(' >> -(just_plain_iders)[_val = _1] >> ')';
-            silly = '{' >> -(just_plain_iders)[_val = _1] >> '}';
-            node = list | curly | silly | operator_string | plain;
+            list = '[' >> -(just_plain_iders)[_val = _1] >> ']' >> eps[push_back(at_c<0>(_val), "[]")];
+            curly = '(' >> -(just_plain_iders)[_val = _1] >> ')' >> eps[push_back(at_c<0>(_val), "()")];
+            silly = '{' >> -(just_plain_iders)[_val = _1] >> '}' >> eps[push_back(at_c<0>(_val), "{}")];
+            node = list
+                    | curly
+                    | silly
+                    | operator_string | plain;
             just_plain_iders = *(char_(' ')) >> node[push_back(at_c<0>(_val), _1)]
                                              >> *(*(char_(' ')) >> node[push_back(at_c<0>(_val), _1)]) >> *(char_(' '));
             //     csvs = node[push_back(at_c<0>(_val), _1)] % ',';
@@ -58,16 +62,16 @@ namespace parser {
 
         }
 
-        qi::rule<Iterator, expression_tree(), qi::locals<std::string>> expression;
-        qi::rule<Iterator, expression_tree(), qi::locals<std::string>> just_plain_iders;
-        qi::rule<Iterator, expression_tree(), qi::locals<std::string>> list;
-        qi::rule<Iterator, expression_tree(), qi::locals<std::string>> curly;
-        qi::rule<Iterator, expression_tree(), qi::locals<std::string>> silly;
+        qi::rule<Iterator, TokenTree(), qi::locals<std::string>> expression;
+        qi::rule<Iterator, TokenTree(), qi::locals<std::string>> just_plain_iders;
+        qi::rule<Iterator, TokenTree(), qi::locals<std::string>> list;
+        qi::rule<Iterator, TokenTree(), qi::locals<std::string>> curly;
+        qi::rule<Iterator, TokenTree(), qi::locals<std::string>> silly;
         qi::rule<Iterator, std::string(), qi::locals<std::string>> plain;
         qi::rule<Iterator, std::string(), qi::locals<std::string>> operator_string;
         qi::rule<Iterator, char(), qi::locals<std::string>> operator_char;
 
-        qi::rule<Iterator, expression_node(), qi::locals<std::string>> node;
+        qi::rule<Iterator, TokenNode(), qi::locals<std::string>> node;
         qi::rule<Iterator, char(), qi::locals<std::string>> little;
         qi::rule<Iterator, char(), qi::locals<std::string>> Big;
 

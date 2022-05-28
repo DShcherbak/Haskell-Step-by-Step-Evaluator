@@ -2,7 +2,7 @@
 #include "../Lexer/Lexer.h"
 
 void HaskellModel::AddStatements(std::vector<string> &statements) {
-    auto result = Lexer::try_parse(statements);
+    auto result = Lexer::functions_to_tokens(statements);
    // statements = process_headers(statements);
    // statements = process_data_types(statements);
    // statements = process_type_classes(statements);

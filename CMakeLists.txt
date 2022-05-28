@@ -23,6 +23,6 @@ add_executable(Haskell_Step_by_Step_Evaluator main.cpp
         Parsing/PartiallyParsedString.cpp Parsing/PartiallyParsedString.h
 
         Lexer/Lexer.cpp Lexer/Lexer.h
-        Lexer/expression_tree.h Lexer/expression_tree.cpp
+        Lexer/TokenTree.h Lexer/TokenTree.cpp
         Lexer/Lexer.h Lexer/Lexer.cpp
-        Lexer/expr_grammar.h)
+        Lexer/expr_grammar.h Exception/CustomException.h Exception/IncorrectTokenException.h)

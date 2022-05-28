@@ -10,14 +10,14 @@
 #include <boost/variant/recursive_variant.hpp>
 #include <boost/foreach.hpp>
 
-#include "expression_tree.h"
+#include "TokenTree.h"
 #include "expr_grammar.h"
 
 #include <string>
 
 class Lexer {
 public:
-    static std::vector<expression_tree> try_parse(const std::vector<std::string>& text);
+    static std::vector<TokenTree> functions_to_tokens(const std::vector<std::string>& text);
 };
 
 

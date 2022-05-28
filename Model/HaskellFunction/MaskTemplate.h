@@ -4,6 +4,9 @@
 #include <string>
 #include <memory>
 #include "../../Parsing/PartiallyParsedString.h"
+#include "../../Parsing/parsing.h"
+#include <iostream>
+#include "../../Exception/CustomException.h"
 
 namespace function {
 

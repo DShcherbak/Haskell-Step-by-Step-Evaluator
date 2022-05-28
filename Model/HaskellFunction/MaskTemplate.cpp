@@ -1,18 +1,7 @@
 #include "MaskTemplate.h"
-#include "../../Parsing/parsing.h"
-#include <iostream>
-#include <cassert>
 
-struct CustomException : public std::exception{
 
-    explicit CustomException(std::string exception_text){
-        text = std::move(exception_text);
-    }
-    std::basic_string<char> text;
-    [[nodiscard]] const char * what() const noexcept override{
-        return text.c_str();
-    }
-};
+
 
 
 
