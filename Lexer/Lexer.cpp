@@ -73,17 +73,12 @@ std::vector<expression_tree> Lexer::try_parse(const std::vector<std::string>& te
         std::string::const_iterator iter = line.begin();
         std::string::const_iterator end = line.end();
         using boost::spirit::ascii::space;
-        std::cout << "Parsing: " << line << "\n";
+
         bool parsed = parse(iter, end, grammar, ast);
-        if (parsed && iter == end)
-        {
-            std::cout << "-------------------------\n";
-            std::cout << "Parsing succeeded\n";
-            std::cout << "-------------------------\n";
-            mini_xml_printer printer;
-            printer(ast);
+        if (parsed && iter == end){
             result.emplace_back(ast);
         } else if (parsed){
+            std::cout << "Parsing: " << line << "\n";
             std::string::const_iterator some = iter + std::min(30, int(end - iter));
             std::string context(iter, (some>end)?end:some);
             std::cout << "-------------------------\n";
@@ -97,6 +92,7 @@ std::vector<expression_tree> Lexer::try_parse(const std::vector<std::string>& te
         }
         else
         {
+            std::cout << "Parsing: " << line << "\n";
             std::string::const_iterator some = iter + std::min(30, int(end - iter));
             std::string context(iter, (some>end)?end:some);
             std::cout << "-------------------------\n";

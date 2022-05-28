@@ -41,7 +41,7 @@ namespace parser {
             little = char_("a-z") | char_('_');
             Big = char_("A-Z");
             identifier = little >> *char_("_'a-zA-Z0-9");
-            number = little >> +char_("0-9") >> -(char_('.') >> +char_("0-9"));
+            number = +char_("0-9") >> -(char_('.') >> +char_("0-9"));
             Data_identifier = Big >> *char_("_'a-zA-Z0-9");
             char_literal = lexeme['\'' >> ((char_('\\')[push_back(_val, _1)] >> char_[push_back(_val, _1)]) ||
                                            (char_ - char_('\''))[push_back(_val, _1)]) >> '\''];
@@ -50,7 +50,7 @@ namespace parser {
                                              (char_ - char_('\"'))[push_back(_val, _1)]) >> '"'];
             plain = string_literal[_val = '"' + _1 + '"'] | char_literal[_val = "'" + _1 + "'"] |
                     (Data_identifier | identifier | number)[_val = _1]; //[_val = "'" + _1 + "'"]
-            operator_char = char_("+,:*^$/=.`<>;") |
+            operator_char = char_("+,:*^$|/=.`<>;") |
                             char_('-');//"+" | lit('-') | lit('/') | lit(':') | lit('*') | lit('^');  //=
             operator_string = +operator_char;
             list = '[' >> -(just_plain_iders)[_val = _1] >> ']';

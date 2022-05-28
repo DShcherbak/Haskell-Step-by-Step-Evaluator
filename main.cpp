@@ -7,7 +7,7 @@ auto getFilesToParse() -> std::vector<std::string>{
 }
 
 int main() {
-    std::cout << "Hello" << std::endl;
+    std::cout << "INITIATING HASKELL STEP-BY-STEP-EVALUATOR" << std::endl;
     HaskellModel haskellModel{};
     lines::HaskellFileParser fileParser{};
     auto files = getFilesToParse();

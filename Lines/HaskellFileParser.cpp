@@ -182,9 +182,9 @@ namespace lines {
         indent_vector lines_without_comments = remove_comments(lines_with_indentation);
         indent_vector lines_with_desugared_where = remove_sugar_from_where(lines_without_comments);
         std::vector<string> statements = compress_lines(lines_with_desugared_where);
-        for(auto &st : statements){
-            std::cout << st << std::endl;
-        }
+    //    for(auto &st : statements){
+    //        std::cout << st << std::endl;
+    //    }
         return statements;
     }
 
