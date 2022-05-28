@@ -21,8 +21,11 @@ std::vector<TokenTree> Lexer::functions_to_tokens(const std::vector<std::string>
         using boost::spirit::ascii::space;
 
         bool parsed = parse(iter, end, grammar, ast);
-        if (parsed && iter == end)
+        if (parsed && iter == end) {
             result.emplace_back(ast);
+            token_tree_printer printer;
+            printer(ast);
+        }
         else if (parsed)
             throw IncorrectTokenException(ast, "Partial parsing error");
         else

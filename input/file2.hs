@@ -1,3 +1,15 @@
+--module Main where
+import qualified Data.Set as Data.Bue
+     
+{-main :: IO()
+main = do
+    print "Hello, HSSE"-}
+
+useDataList = Data.Bue.foldl (+) 0.Data.Bue.map (+1).Data.Bue.fromList 
+useDataList' = Data.Bue.foldl (+.+) 2.3 . Data.Bue.map (+5)
+
+
+
 good'N't' ('a':('b':"c   sdf (")) = "abc"
 good'N't' ('1':('2':['3','4','5'])) = "12345"
 good'N't' ['3'] = "--3--"
@@ -5,6 +17,7 @@ good'N't' x = "---"
 
 hardComment "{-" = "{-" {- -- hello a {- tricccccky -} comment here -}
             ++ "{-"
+hardComment x = "Passed"
 
 complexWhere' :: Num a => a -> a -> a -> a
 complexWhere' x y z = let{a = t1 + t2 where{t1 = x ;t2 = y}} in let{b = t3 + a where{t3 = z}} in b ^ q where{q = b2 - b1 - kk where{b1 = 1; b2 = 2; kk = 1} ;kk = 0}

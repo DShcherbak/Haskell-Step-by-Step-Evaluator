@@ -36,15 +36,18 @@ namespace parser {
             little = char_("a-z") | char_('_');
             Big = char_("A-Z");
             identifier = little >> *char_("_'a-zA-Z0-9");
-            number = +char_("0-9") >> -(char_('.') >> +char_("0-9"));
-            Data_identifier = Big >> *char_("_'a-zA-Z0-9");
+
+            integer = +char_("0-9");
+            floater = integer >> char_('.') >> integer;
+            Data_identifier = Big >> *char_("_'.a-zA-Z0-9");
             char_literal = lexeme['\'' >> ((char_('\\')[push_back(_val, _1)] >> char_[push_back(_val, _1)]) ||
                                            (char_ - char_('\''))[push_back(_val, _1)]) >> '\''];
             string_literal = lexeme['"' >> *(char_('\\')[push_back(_val, _1)] >> char_[push_back(_val, _1)] ||
                                              (char_ - char_('"'))[push_back(_val, _1)] ||
                                              (char_ - char_('\"'))[push_back(_val, _1)]) >> '"'];
             plain = string_literal[_val = '"' + _1 + '"'] | char_literal[_val = "'" + _1 + "'"] |
-                    (Data_identifier | identifier | number)[_val = _1]; //[_val = "'" + _1 + "'"]
+                    (Data_identifier | identifier | floater)[_val = _1]
+                    | integer[_val = _1]; //[_val = "'" + _1 + "'"]
             operator_char = char_("+,:*^$|/=.`<>;") | //TODO: every operator (Look up from Haskell Report)
                             char_('-');//"+" | lit('-') | lit('/') | lit(':') | lit('*') | lit('^');  //=
             operator_string = +operator_char;
@@ -76,7 +79,8 @@ namespace parser {
         qi::rule<Iterator, char(), qi::locals<std::string>> Big;
 
         qi::rule<Iterator, std::string(), qi::locals<std::string>> identifier;
-        qi::rule<Iterator, std::string(), qi::locals<std::string>> number;
+        qi::rule<Iterator, std::string(), qi::locals<std::string>> integer;
+        qi::rule<Iterator, std::string(), qi::locals<std::string>> floater;
         qi::rule<Iterator, std::string(), qi::locals<std::string>> Data_identifier;
         qi::rule<Iterator, std::string(), qi::locals<std::string>> string_literal;
         qi::rule<Iterator, std::string(), qi::locals<std::string>> char_literal;

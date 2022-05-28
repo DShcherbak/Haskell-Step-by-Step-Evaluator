@@ -64,13 +64,14 @@ void token_tree_printer::operator()(TokenTree const& xml) const
 struct IncorrectTokenException : CustomException{
     explicit IncorrectTokenException(const TokenTree& token_tree, std::string exception_text)
             : CustomException(exception_text){
-        std::cout << "Parsing error" << std::endl;
-        token_tree_printer printer;
-        printer(token_tree);
+        tree = token_tree;
         text = std::move(exception_text);
     }
     std::basic_string<char> text;
+    TokenTree tree;
     [[nodiscard]] const char * what() const noexcept override{
+        token_tree_printer printer;
+        printer(tree);
         return text.c_str();
     }
 };
