@@ -5,6 +5,7 @@ void HaskellModel::AddStatements(std::vector<string> &statements) {
     token_tree_vector = process_headers(token_tree_vector);
     token_tree_vector = process_data_types(token_tree_vector);
     token_tree_vector = process_type_classes(token_tree_vector);
+    //operators and function type definitions
     process_functions(token_tree_vector);
     std::cout << functions.size() << std::endl;
     std::cout << functions.size() << std::endl;
