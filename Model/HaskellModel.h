@@ -8,7 +8,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <map>
-#include "../Lines/HaskellFileParser.h"]
+#include "../Lines/HaskellFileParser.h"
 #include "../Lexer/Lexer.h"
 #include "../Exception/IncorrectTokenException.h"
 

@@ -12,19 +12,52 @@ typedef
 boost::variant<boost::recursive_wrapper<TokenTree>, std::string>
         TokenNode;
 
+
+
 class TokenTree
 {
 public:
-    void print();
+    void print() const;
     std::vector<TokenNode> children;
 
 };
+
+
+void tab(int indent);
+
+
+struct token_tree_printer
+{
+    explicit token_tree_printer(int indent = 0)
+            : indent(indent)
+    {
+    }
+
+    void operator()(TokenTree const& xml) const;
+
+    int indent;
+};
+
+struct token_tree_node_printer : boost::static_visitor<>
+{
+    explicit token_tree_node_printer(int indent = 0)
+            : indent(indent)
+    {
+    }
+
+    void operator()(TokenTree const& xml) const;
+    void operator()(std::string const& text) const;
+
+    int indent;
+};
+
 
 
 BOOST_FUSION_ADAPT_STRUCT(
         TokenTree,
         (std::vector<TokenNode>, children)
 )
+
 
 
 

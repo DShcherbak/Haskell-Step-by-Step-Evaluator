@@ -46,6 +46,7 @@ namespace lines {
     }
 
     size_t count_block_indent(indent_vector & lines_with_indentation, size_t &line_id, size_t &char_id){
+        size_t current_indent = lines_with_indentation[line_id].indentation;
         auto line = lines_with_indentation[line_id].parsed_line;
         size_t n = line.size();
         if (char_id < n) {
@@ -59,7 +60,13 @@ namespace lines {
             lines_with_indentation[line_id].parsed_line.append("{");
             line_id++;
             char_id = 0;
-            return lines_with_indentation[line_id].indentation;
+            size_t new_indentation = lines_with_indentation[line_id].indentation;
+            if(new_indentation > current_indent)
+                return new_indentation;
+            else{
+                lines_with_indentation[line_id-1].parsed_line.append("}"); //line.substr(0, char_id - 1) + "{" + line.substr(char_id);
+                return 0;
+            }
         }
     }
 
@@ -71,7 +78,7 @@ namespace lines {
                 lines_with_indentation[line_id].insert_at(';', 0);//";" + lines_with_indentation[line_id].parsed_line;
             }
             else if(lines_with_indentation[line_id].indentation < block_indent){
-                if(key == "where" || key == "do" || key == "of" || 
+                if(key == "where" || key == "do" || key == "of" ||
                         (key == "let" && do_let_special_case > 0 && lines_with_indentation[line_id].indentation == do_let_special_case)){
                     --line_id;
                     lines_with_indentation[line_id].parsed_line.append("}");
