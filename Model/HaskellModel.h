@@ -12,6 +12,8 @@
 #include "../Lexer/Lexer.h"
 #include "../Exception/IncorrectTokenException.h"
 
+typedef std::vector<TokenNode> TokenList;
+typedef std::vector<std::pair<TokenList, TokenList>> GuardVector;
 
 class HaskellModel {
 public:
@@ -22,12 +24,10 @@ public:
 private:
     std::map<std::string, std::shared_ptr<function::Function>> functions;
 
-    using LineStatements = std::vector<lines::LineStatement>;
-
     std::vector<TokenTree> process_headers(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_data_types(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_type_classes(const std::vector<TokenTree> &statements);
-    std::vector<TokenTree> process_functions(const std::vector<TokenTree> &statements);
+    void process_functions(const std::vector<TokenTree> &statements);
 
     std::shared_ptr<function::Function> GetOrCreateFunction(const string &name);
 

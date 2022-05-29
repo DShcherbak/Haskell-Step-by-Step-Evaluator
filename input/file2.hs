@@ -1,33 +1,40 @@
-module Main where 
+module Main where
 
 import qualified Data.Set as Data.Bue
 import Data.List ( sort )
 
 --[1,2,3]
 mySort :: [Int] -> [Int]
-mySort = sort 
-     
+mySort = sort
+
 main :: IO()
 main = do
     print "Hello, HSSE"
 
-infixr 6 +.+
-(+.+) :: Double  -> Double -> Double 
-(+.+) x y = x + x + y + y
+--infixr 6 +.+
+--(+.+) :: Double  -> Double -> Double
+--(+.+) x y = x + x + y + y
+
+class GoodTypes a where
+    iAmGood :: a -> String
+
+instance GoodTypes Int where
+    iAmGood x | even x = "We are good"
+              | otherwise    = "I am good"
 
 
 testCaseForCase :: Maybe (Maybe [Char]) -> [Char]
-testCaseForCase x = case x of 
+testCaseForCase x = case x of
     Nothing -> "Nothing"
-    Just x -> case x of 
+    Just x -> case x of
         Nothing -> "Just Nothing"
-        Just y -> "Just Just " ++ y 
+        Just y -> "Just Just " ++ y
 
 useDataList :: [Integer] -> Integer
-useDataList = Data.Bue.foldl (+) 0.Data.Bue.map (+1).Data.Bue.fromList 
+useDataList = Data.Bue.foldl (+) 0.Data.Bue.map (+1).Data.Bue.fromList
 
 useDataList' :: Data.Bue.Set Double -> Double
-useDataList' = Data.Bue.foldl (+.+) 2.3 . Data.Bue.map (+5)
+useDataList' = Data.Bue.foldl (*) 2.3 . Data.Bue.map (+5)
 
 
 
@@ -45,9 +52,9 @@ complexWhere' x y z = let{a = t1 + t2 where{t1 = x ;t2 = y}} in let{b = t3 + a w
 
 doWithWhere :: IO ()
 doWithWhere = do
-    let {x = 2} 
+    let {x = 2}
         in print x
-    let x = let 
+    let x = let
             p = 4 in p
 
     let {y = 4}
@@ -59,7 +66,7 @@ doWithWhere = do
 
 
 
-letConfused = let p = 3 
+letConfused = let p = 3
     in p * p
 
 let1 x = let a = b + 1
@@ -78,15 +85,15 @@ complexWhere x y z = let a = t1 + t2 where t1 = x
 complexWhere x y z = let {a = t1 + t2 where{t1 = x;t2 = y}in let{b = t3 + a where{t3 = z}}in b ^ q where{q = b2 - b1 - kk where{b1 = 1; b2 = 2; kk = 1};kk = 0}
                                            -}
 
-anotherTest x = let p = (x^2)in(+)p x 
+anotherTest x = let p = (x^2)in(+)p x
 
 mixLetAndWhere x = let p = y where y = x + 1 in p
 
-closedAndUnclosedLet x = let {p = 3 ; d = let q = x in d} in p + d  
+closedAndUnclosedLet x = let {p = 3 ; d = let q = x in d} in p + d
 
-complexLNW= let p = q where q = let{z = 1}in z in p 
+complexLNW= let p = q where q = let{z = 1}in z in p
 
-complexLNW' = let{p = q where{q = let{z = 1}in z }}in p 
+complexLNW' = let{p = q where{q = let{z = 1}in z }}in p
 
 
 
