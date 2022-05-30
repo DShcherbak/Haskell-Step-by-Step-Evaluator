@@ -17,6 +17,7 @@ typedef std::vector<std::pair<TokenList, TokenList>> GuardVector;
 
 class HaskellModel {
 public:
+
     std::string moduleName;
     void AddStatements(std::vector<string> &statements);
 

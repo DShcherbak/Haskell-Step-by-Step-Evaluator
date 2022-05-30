@@ -165,4 +165,6 @@ testSecondWhere n = helper (n^2)
                     helper n | mod n 2 == 0 = 1
                              | otherwise    = 17
 
+f :: Int -> Int 
+f x = 3
 --elementAt :: [a] -> Int -> a

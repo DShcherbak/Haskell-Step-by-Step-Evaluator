@@ -1,0 +1,14 @@
+#ifndef HASKELL_STEP_BY_STEP_EVALUATOR_HASTMASKNODE_H
+#define HASKELL_STEP_BY_STEP_EVALUATOR_HASTMASKNODE_H
+
+
+#include "HastNode.h"
+
+#define HAST_MN HastMaskNode;
+
+class HastMaskNode : public HastNode{
+
+};
+
+
+#endif //HASKELL_STEP_BY_STEP_EVALUATOR_HASTMASKNODE_H
