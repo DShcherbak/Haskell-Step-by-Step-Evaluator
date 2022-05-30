@@ -6,8 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(Haskell_Step_by_Step_Evaluator main.cpp
 
 
-        Lines/LineStatement.cpp Lines/LineStatement.h
-        Lines/LineParser.cpp Lines/LineParser.h
         Lines/IndentedLine.cpp Lines/IndentedLine.h
         Lines/HaskellFileParser.cpp Lines/HaskellFileParser.h
 

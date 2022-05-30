@@ -166,5 +166,4 @@ testSecondWhere n = helper (n^2)
                              | otherwise    = 17
 
 f :: Int -> Int 
-f x = 3
---elementAt :: [a] -> Int -> a
+f x = 3 

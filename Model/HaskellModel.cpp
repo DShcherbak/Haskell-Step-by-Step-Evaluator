@@ -19,12 +19,6 @@ std::shared_ptr<function::Function> HaskellModel::GetOrCreateFunction(const std:
     return functions[name];
 }
 
-void HaskellModel::function_type_define(const std::string& name, const lines::LineStatement& stmnt){
-    auto func = GetOrCreateFunction(name);
-    func->type_definition = stmnt.line;
-    func->type_definition_string = stmnt.original_line;
-}
-
 //  auto func = GetOrCreateFunction(name);
 //  func->add_mask(mask);
 

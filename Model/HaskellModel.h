@@ -32,9 +32,6 @@ private:
 
     std::shared_ptr<function::Function> GetOrCreateFunction(const string &name);
 
-    void function_type_define(const string &name, const lines::LineStatement &stmnt);
-    void add_expression_to_function(const string &name, const lines::LineStatement &statements);
-
     void setName(const std::string &name);
     void addImportToModel(const std::vector<TokenNode> &import);
 
