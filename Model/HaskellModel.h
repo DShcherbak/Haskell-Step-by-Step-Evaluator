@@ -40,6 +40,8 @@ private:
     void addImportToModel(const std::vector<TokenNode> &import);
 
     void add_data_structure(const TokenTree &tree);
+
+    void add_function_arity(const std::vector<TokenTree> &trees);
 };
 
 

@@ -64,8 +64,7 @@ std::tuple<TokenList, GuardVector> process_guards(const TokenTree& tree){
     return result;
 }
 
-void HaskellModel::process_functions(const std::vector<TokenTree>& trees) {
-    size_t i = 0, n = trees.size();
+void HaskellModel::add_function_arity(const std::vector<TokenTree>& trees) {
     for(auto & tree : trees){
         auto processed_guards = process_guards(tree);
         auto function_mask = std::get<0>(processed_guards);
@@ -81,9 +80,10 @@ void HaskellModel::process_functions(const std::vector<TokenTree>& trees) {
     for(const auto& f : operators){
         std::cout << f.second->value << " : " << f.second->precedence << std::endl;
     }
+}
 
-
-
+void HaskellModel::process_functions(const std::vector<TokenTree>& trees) {
+    add_function_arity(trees);
 }
 
 std::vector<TokenTree> HaskellModel::process_type_classes(const std::vector<TokenTree> &trees) {
