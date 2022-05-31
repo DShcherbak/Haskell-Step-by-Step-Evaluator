@@ -26,22 +26,22 @@ public:
     void read_prelude(const std::vector<std::string>& lines);
 
 private:
-    std::map<std::string, std::shared_ptr<HAST_FN>> functions;
-    std::map<std::string, std::shared_ptr<HAST_ON>> operators;
+    std::map<std::string, HAST_FN> functions;
+    std::map<std::string, HAST_ON> operators;
 
     std::vector<TokenTree> process_headers(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_data_types(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_type_classes(const std::vector<TokenTree> &statements);
     void process_functions(const std::vector<TokenTree> &statements);
 
-    std::shared_ptr<HastFunctionNode> get_or_create_function(const string &name, const TokenList &tokens);
+    HAST_FN get_or_create_function(const string &name);
 
     void setName(const std::string &name);
     void addImportToModel(const std::vector<TokenNode> &import);
 
     void add_data_structure(const TokenTree &tree);
 
-    void add_function_arity(const std::vector<TokenTree> &trees);
+    std::vector<std::tuple<TokenList, GuardVector>> add_function_arity(const std::vector<TokenTree> &trees);
 };
 
 

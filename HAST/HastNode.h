@@ -6,6 +6,8 @@
 
 //Haskell Abstract Tree Node
 
+#define HAST_N std::shared_ptr<HastNode>
+
 enum class HastNodeType{String, Char, Int, Double, List, Tuple, DataConstructor, Any, Variable};
 
 class HastNode {

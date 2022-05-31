@@ -3,7 +3,7 @@
 
 #include "HastNode.h"
 
-#define HAST_ON HastOperatorNode
+#define HAST_ON std::shared_ptr<HastOperatorNode>
 
 enum class OperatorAssociativity {Left,Right,None};
 

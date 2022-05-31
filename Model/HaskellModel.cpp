@@ -11,18 +11,13 @@ void HaskellModel::AddStatements(std::vector<string> &statements) {
     std::cout << functions.size() << std::endl;
 }
 
-
-std::shared_ptr<HastFunctionNode> HaskellModel::get_or_create_function(const string &name, const TokenList &tokens) {
+HAST_FN HaskellModel::get_or_create_function(const string &name) {
     if(!functions.contains(name)){
-        auto func_node = std::make_shared<HAST_FN>();
-        func_node->number_of_arguments = tokens.size()-1;
+        HAST_FN func_node = std::make_shared<HastFunctionNode>();
         functions.insert({name, func_node});
     }
     return functions[name];
 }
-
-//  auto func = get_or_create_function(name);
-//  func->add_mask(mask);
 
 size_t find_next_token(const TokenList& list_to_scan, const std::string& token_to_find, size_t start = 0){
     size_t i = start, n = list_to_scan.size();
@@ -64,14 +59,16 @@ std::tuple<TokenList, GuardVector> process_guards(const TokenTree& tree){
     return result;
 }
 
-void HaskellModel::add_function_arity(const std::vector<TokenTree>& trees) {
+std::vector<std::tuple<TokenList, GuardVector>> HaskellModel::add_function_arity(const std::vector<TokenTree>& trees) {
+    std::vector<std::tuple<TokenList, GuardVector>> result;
     for(auto & tree : trees){
         auto processed_guards = process_guards(tree);
         auto function_mask = std::get<0>(processed_guards);
         if(function_mask.empty() || function_mask[0].which() == 0)
             continue;
         std::string function_name = get<std::string>(function_mask[0]);
-        get_or_create_function(function_name, function_mask);
+        HAST_FN fn = get_or_create_function(function_name);
+        fn->number_of_arguments = function_mask.size()-1;
     }
     for(const auto& f : functions){
         std::cout << f.first << " : " << f.second->number_of_arguments << std::endl;
@@ -80,10 +77,39 @@ void HaskellModel::add_function_arity(const std::vector<TokenTree>& trees) {
     for(const auto& f : operators){
         std::cout << f.second->value << " : " << f.second->precedence << std::endl;
     }
+    return result;
+}
+
+HAST_FULL_MASK build_mask(const TokenList& list){
+    return {"", {}};
+}
+
+std::shared_ptr<HastNode> build_expression(const TokenList& list){
+    return {};
 }
 
 void HaskellModel::process_functions(const std::vector<TokenTree>& trees) {
-    add_function_arity(trees);
+    auto function_expression_vector = add_function_arity(trees);
+    for(auto const& expr : function_expression_vector){
+        auto mask = build_mask(std::get<0>(expr));
+        auto bodies = std::get<1>(expr);
+
+        std::string func_name = mask.first;
+        auto func = get_or_create_function(func_name);
+
+        if(bodies.size() == 1 && bodies[0].first.empty()){ //has no guards
+            auto body = build_expression(bodies[0].second);
+            func->add_expression(mask, body);
+        } else {
+            std::vector<HAST_GUARD> builded_guards = {};
+            for(auto const & body_part : bodies){
+                HAST_N guard_expr = build_expression(body_part.first);
+                HAST_N guard_body = build_expression(body_part.second);
+                builded_guards.emplace_back(guard_expr, guard_body);
+            }
+            func->add_expression_with_guards(mask, builded_guards);
+        }
+    }
 }
 
 std::vector<TokenTree> HaskellModel::process_type_classes(const std::vector<TokenTree> &trees) {
@@ -163,7 +189,7 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
         std::string func_name = lines[i].substr(0,lines[i].find(' '));
         std::string func_arity = lines[i].substr(lines[i].find(' ')+1);
         int arity = std::stoi(func_arity);
-        auto func_node = std::make_shared<HAST_FN>();
+        HAST_FN func_node = std::make_shared<HastFunctionNode>();
         func_node->number_of_arguments = arity;
         functions.insert({func_name, func_node});
         i++;
@@ -173,7 +199,7 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
         size_t first_space = lines[i].find(' ');
         size_t second_space = lines[i].find(' ', first_space+1);
 
-        auto oper_node = std::make_shared<HAST_ON>();
+        HAST_ON oper_node = std::make_shared<HastOperatorNode>();
         if(lines[i].starts_with("infixr")){
             oper_node->associativity = OperatorAssociativity::Right;
         } else if(lines[i].starts_with("infixl")){
