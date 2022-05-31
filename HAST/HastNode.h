@@ -8,7 +8,7 @@
 
 #define HAST_N std::shared_ptr<HastNode>
 
-enum class HastNodeType{String, Char, Int, Double, List, Tuple, DataConstructor, Any, Variable};
+enum class HastNodeType{String, Char, Int, Double, Bool, List, Tuple, DataConstructor, Any, Variable};
 
 class HastNode {
 public:
@@ -19,11 +19,14 @@ public:
     std::string name;
     HastNodeType type;
     explicit HastNode()=default;
+    explicit HastNode(HastNodeType type);
     explicit HastNode(const TokenTree& tree);
     explicit HastNode(const std::string& tree);
     explicit HastNode(const TokenNode& tree);
 
+    static std::string type_to_str(HastNodeType type);
 };
+
 
 
 #endif //HASKELL_STEP_BY_STEP_EVALUATOR_HASTNODE_H

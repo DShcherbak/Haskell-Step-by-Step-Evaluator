@@ -13,6 +13,7 @@
 #include "../Exception/IncorrectTokenException.h"
 #include "../HAST/HastFunctionNode.h"
 #include "../HAST/HastOperatorNode.h"
+#include "../HAST/HastNodeFactory.h"
 
 typedef std::vector<TokenNode> TokenList;
 typedef std::vector<std::pair<TokenList, TokenList>> GuardVector;

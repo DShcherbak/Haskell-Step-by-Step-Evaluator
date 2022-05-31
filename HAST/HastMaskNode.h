@@ -5,10 +5,9 @@
 #include "HastNode.h"
 
 #define HAST_MN std::shared_ptr<HastMaskNode>;
-#define HAST_FULL_MASK std::pair<std::string, std::vector<std::shared_ptr<HastMaskNode>>>
+#define HAST_FULL_MASK std::pair<std::string, std::vector<std::shared_ptr<HastNode>>>
 
 class HastMaskNode : public HastNode{
-
 };
 
 

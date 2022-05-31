@@ -1,4 +1,5 @@
 #include "HaskellModel.h"
+#include "../HAST/HastPrinter.h"
 
 void HaskellModel::AddStatements(std::vector<string> &statements) {
     auto token_tree_vector = Lexer::functions_to_tokens(statements);
@@ -63,6 +64,7 @@ std::vector<std::tuple<TokenList, GuardVector>> HaskellModel::add_function_arity
     std::vector<std::tuple<TokenList, GuardVector>> result;
     for(auto & tree : trees){
         auto processed_guards = process_guards(tree);
+        result.emplace_back(processed_guards);
         auto function_mask = std::get<0>(processed_guards);
         if(function_mask.empty() || function_mask[0].which() == 0)
             continue;
@@ -80,8 +82,96 @@ std::vector<std::tuple<TokenList, GuardVector>> HaskellModel::add_function_arity
     return result;
 }
 
-HAST_FULL_MASK build_mask(const TokenList& list){
-    return {"", {}};
+std::shared_ptr<HastNode> make_mask(const TokenTree& tree);
+
+std::shared_ptr<HastNode> make_mask(const TokenNode& token){
+    std::shared_ptr<HastNode> node = HastNodeFactory::create_node(1).get_node();
+    if(token.which() == 0){
+        auto tree = get<TokenTree>(token);
+        node = make_mask(tree);
+    } else {
+        auto value_str = get<std::string>(token);
+        node = HastNodeFactory::create_node(1).with_value(value_str).get_node();
+    }
+    return node;
+}
+
+std::vector<std::shared_ptr<HastNode>> apply_data_constructors(const std::vector<std::shared_ptr<HastNode>>& list){
+    //TODO: APPLY DATA CONSTRUCTORS
+    return list;
+}
+
+std::shared_ptr<HastNode> make_mask(const TokenTree& tree){
+    std::shared_ptr<HastNode> node = HastNodeFactory::create_node(1).get_node();
+    std::vector<std::shared_ptr<HastNode>> elements;
+    for(auto const& elem : std::vector(tree.children.begin(), tree.children.end()-1)){
+        elements.emplace_back(make_mask(elem));
+    }
+    elements = apply_data_constructors(elements);
+    std::string recursion_type = get<std::string>(tree.children[tree.children.size()-1]);
+    if(recursion_type == "[]"){
+        node->type = HastNodeType::List;
+        std::shared_ptr<HastNode> cur = node;
+        cur->first = elements[0];
+        size_t i = 1, n = elements.size();
+        while(i < n){
+            if(elements[i]->value != ",")
+                throw CustomException("Wrong list parsing in mask definition: \"" + elements[i]->value + "\" should have been a ','");
+            i++;
+            cur->rest = HastNodeFactory::create_node(1).with_type(HastNodeType::List).get_node();
+            cur = cur->rest;
+            cur->first = elements[i];
+            i++;
+        }
+    } else { //it is a () cause a mask can't have a {}
+              // so a tuple or a desugared list
+        std::shared_ptr<HastNode> cur = node;
+
+        cur->first = elements[0];
+        size_t i = 1, n = elements.size();
+        if(n == 1)
+            return node;
+        if(elements[1]->value == ","){
+            node->type = HastNodeType::Tuple;
+            while(i < n){
+                if(elements[i]->value != ",")
+                    throw CustomException("Wrong list parsing in mask definition: \"" + elements[i]->value + "\" should have been a ','");
+                i++;
+                cur->rest = HastNodeFactory::create_node(1).with_type(HastNodeType::Tuple).get_node();
+                cur->rest->parent = cur;
+                cur = cur->rest;
+                cur->first = elements[i];
+                i++;
+            }
+        } else if(elements[1]->value == ":"){
+            while(i < n){
+                if(elements[i]->value != ":")
+                    throw CustomException("Wrong list parsing in mask definition: \"" + elements[i]->value + "\" should have been a ':'");
+                i++;
+                cur->rest = HastNodeFactory::create_node(1).with_type(HastNodeType::List).get_node();
+                cur->rest->parent = cur;
+                cur = cur->rest;
+                cur->first = elements[i];
+                i++;
+            }
+            cur->parent->rest = cur->first;
+        //    cur->parent->rest->type = cur->parent->rest->type == HastNodeType::String ? HastNodeType::String : HastNodeType::List;
+        } else {
+            throw CustomException("Error while parsing mask: \"" + elements[1]->value + "\" should have been a ',' or a ':'");
+        }
+    }
+    return node;
+}
+
+HAST_FULL_MASK build_full_function_mask(const TokenList& list){
+    std::pair<std::string, std::vector<std::shared_ptr<HastNode>>> result;
+    if(list.empty())
+        return result;
+    result.first = get<std::string>(list[0]);
+    for(size_t i = 1, n = list.size(); i < n; i++){
+        result.second.emplace_back(make_mask(list[i]));
+    }
+    return result;
 }
 
 std::shared_ptr<HastNode> build_expression(const TokenList& list){
@@ -91,7 +181,9 @@ std::shared_ptr<HastNode> build_expression(const TokenList& list){
 void HaskellModel::process_functions(const std::vector<TokenTree>& trees) {
     auto function_expression_vector = add_function_arity(trees);
     for(auto const& expr : function_expression_vector){
-        auto mask = build_mask(std::get<0>(expr));
+        auto mask = build_full_function_mask(std::get<0>(expr));
+        for(auto const& node : mask.second )
+            HastPrinter::print_node(node);
         auto bodies = std::get<1>(expr);
 
         std::string func_name = mask.first;
@@ -101,13 +193,13 @@ void HaskellModel::process_functions(const std::vector<TokenTree>& trees) {
             auto body = build_expression(bodies[0].second);
             func->add_expression(mask, body);
         } else {
-            std::vector<HAST_GUARD> builded_guards = {};
+            std::vector<HAST_GUARD> built_guards = {};
             for(auto const & body_part : bodies){
                 HAST_N guard_expr = build_expression(body_part.first);
                 HAST_N guard_body = build_expression(body_part.second);
-                builded_guards.emplace_back(guard_expr, guard_body);
+                built_guards.emplace_back(guard_expr, guard_body);
             }
-            func->add_expression_with_guards(mask, builded_guards);
+            func->add_expression_with_guards(mask, built_guards);
         }
     }
 }
