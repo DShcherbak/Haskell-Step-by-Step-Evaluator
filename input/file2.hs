@@ -165,5 +165,6 @@ testSecondWhere n = helper (n^2)
                     helper n | mod n 2 == 0 = 1
                              | otherwise    = 17
 
-f :: Int -> Int 
-f x = 3 
+--f :: Int -> Int 
+--f :: Num p1 => p2 -> p1
+--f x = 3 

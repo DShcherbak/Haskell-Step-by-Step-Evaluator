@@ -23,4 +23,4 @@ add_executable(Haskell_Step_by_Step_Evaluator main.cpp
         Lexer/Lexer.cpp Lexer/Lexer.h
         Lexer/TokenTree.h Lexer/TokenTree.cpp
         Lexer/Lexer.h Lexer/Lexer.cpp
-        Lexer/expr_grammar.h Exception/CustomException.h Exception/IncorrectTokenException.h HAST/HastNode.cpp HAST/HastNode.h HAST/HastMaskNode.cpp HAST/HastMaskNode.h HAST/HastFunctionNode.cpp HAST/HastFunctionNode.h)
+        Lexer/expr_grammar.h Exception/CustomException.h Exception/IncorrectTokenException.h HAST/HastNode.cpp HAST/HastNode.h HAST/HastMaskNode.cpp HAST/HastMaskNode.h HAST/HastFunctionNode.cpp HAST/HastFunctionNode.h HAST/HastOperatorNode.cpp HAST/HastOperatorNode.h)

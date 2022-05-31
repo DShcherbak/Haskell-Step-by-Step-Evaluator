@@ -3,3 +3,5 @@
 //
 
 #include "HastFunctionNode.h"
+
+HastFunctionNode::HastFunctionNode() = default;

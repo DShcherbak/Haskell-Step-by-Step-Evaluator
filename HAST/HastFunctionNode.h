@@ -14,6 +14,8 @@ public:
     std::vector<HastNode> arguments;
     std::map<HastMaskNode, std::map<HastNode, HastNode>> guards;
     std::map<HastMaskNode, HastNode> function_definitions;
+
+    explicit HastFunctionNode();
 };
 
 

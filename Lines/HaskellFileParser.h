@@ -22,6 +22,9 @@ namespace lines {
         HaskellFileParser()= default;
 
         std::vector<std::string> parse_file(const std::string& file_name);
+
+        std::vector<std::string> read_prelude();
+
     private:
         std::vector<std::string> preprocess_lines(const std::vector<string> &lines);
         indent_vector indentation(const std::vector<std::string> &lines);

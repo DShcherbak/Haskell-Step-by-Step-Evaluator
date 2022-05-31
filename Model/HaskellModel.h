@@ -11,6 +11,8 @@
 #include "../Lines/HaskellFileParser.h"
 #include "../Lexer/Lexer.h"
 #include "../Exception/IncorrectTokenException.h"
+#include "../HAST/HastFunctionNode.h"
+#include "../HAST/HastOperatorNode.h"
 
 typedef std::vector<TokenNode> TokenList;
 typedef std::vector<std::pair<TokenList, TokenList>> GuardVector;
@@ -21,16 +23,18 @@ public:
     std::string moduleName;
     void AddStatements(std::vector<string> &statements);
 
+    void read_prelude(const std::vector<std::string>& lines);
 
 private:
-    std::map<std::string, std::shared_ptr<function::Function>> functions;
+    std::map<std::string, std::shared_ptr<HAST_FN>> functions;
+    std::map<std::string, std::shared_ptr<HAST_ON>> operators;
 
     std::vector<TokenTree> process_headers(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_data_types(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_type_classes(const std::vector<TokenTree> &statements);
     void process_functions(const std::vector<TokenTree> &statements);
 
-    std::shared_ptr<function::Function> GetOrCreateFunction(const string &name);
+    std::shared_ptr<HastFunctionNode> get_or_create_function(const string &name, const TokenList &tokens);
 
     void setName(const std::string &name);
     void addImportToModel(const std::vector<TokenNode> &import);
