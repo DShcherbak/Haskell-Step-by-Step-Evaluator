@@ -1,7 +1,7 @@
 #include "HaskellModel.h"
 #include "../HAST/HastPrinter.h"
 
-void HaskellModel::AddStatements(std::vector<string> &statements) {
+void HaskellModel::add_statements(std::vector<string> &statements) {
     auto token_tree_vector = Lexer::functions_to_tokens(statements);
     token_tree_vector = process_headers(token_tree_vector);
     token_tree_vector = process_data_types(token_tree_vector);
@@ -82,9 +82,8 @@ std::vector<std::tuple<TokenList, GuardVector>> HaskellModel::add_function_arity
     return result;
 }
 
-std::shared_ptr<HastNode> make_mask(const TokenTree& tree);
 
-std::shared_ptr<HastNode> make_mask(const TokenNode& token){
+std::shared_ptr<HastNode> HaskellModel::make_mask(const TokenNode& token){
     std::shared_ptr<HastNode> node = HastNodeFactory::create_node(1).get_node();
     if(token.which() == 0){
         auto tree = get<TokenTree>(token);
@@ -96,12 +95,90 @@ std::shared_ptr<HastNode> make_mask(const TokenNode& token){
     return node;
 }
 
-std::vector<std::shared_ptr<HastNode>> apply_data_constructors(const std::vector<std::shared_ptr<HastNode>>& list){
-    //TODO: APPLY DATA CONSTRUCTORS
-    return list;
+std::vector<std::shared_ptr<HastNode>> HaskellModel::apply_data_constructors(std::vector<std::shared_ptr<HastNode>>& list){
+    int i = 0, n = (int) list.size();
+    if(n == 0)
+        return {};
+    std::vector<std::shared_ptr<HastNode>> interim_result;
+    if(list[0]->type == HastNodeType::InfixDataConstructor){//n == 1
+        list[0]->type = HastNodeType::DataConstructor;
+        return {list.begin(), list.begin()+1};
+    }
+    while(i < n){
+        if(list[i]->type == HastNodeType::DataConstructor){
+            if(data_constructor_arity.contains(list[i]->value)){
+                int arity = data_constructor_arity[list[i]->value];
+                auto node = HastNodeFactory::create_node(1).with_value(list[i]->value).get_node();
+                interim_result.emplace_back(node);
+                while(arity > 0 && i < n-1){
+                    ++i;
+                    node->first = list[i];
+                    --arity;
+                    if(arity > 0){
+                        node->rest = HastNodeFactory::create_node(1).with_type(HastNodeType::DataConstructor).get_node();
+                        node = node->rest;
+                    }
+                }
+            } else if (infix_data_constructors.contains(list[i]->value)) {
+                auto node = HastNodeFactory::create_node(1).with_value(list[i]->value).get_node();
+                interim_result.emplace_back(node);
+                if(i < n-1) node->first = list[++i];
+                if(i < n-1) node->rest = list[i+1];
+            }else {
+                throw CustomException("Unknown data constructor: " + list[i]->value);
+            }
+        } else if (list[i]->type == HastNodeType::InfixDataConstructor && list[i]->value != ":") {
+            if(infix_data_constructors.contains(list[i]->value)){
+                auto node = HastNodeFactory::create_node(1).with_value(list[i]->value).get_node();
+                if(!interim_result.empty()){
+                    node->first = interim_result.back();
+                    interim_result.pop_back();
+                }
+                if(i < n-1) node->rest = list[++i];
+                interim_result.emplace_back(node);
+            } else {
+                throw CustomException("Unknown data constructor: " + list[i]->value);
+            }
+        } else {
+            interim_result.emplace_back(list[i]);
+        }
+        i++;
+    }
+
+    //special case for desugared lists, since they are not completely desugared, as it turns out
+    std::vector<HAST_N> result;
+    i = (int) interim_result.size()-1;
+    n = i;
+    while(i >= 0){
+        if(interim_result[i]->value == ":"){
+            auto node = HastNodeFactory::create_node(1).with_type(HastNodeType::List).get_node();
+            if(interim_result[i]->type == HastNodeType::InfixDataConstructor){
+                if(!result.empty()){
+                    node->rest = result.back();
+                    result.pop_back();
+                }
+                if(i > 0) node->first = interim_result[--i];
+            } else {
+                if(!result.empty()){
+                    node->first = result.back();
+                    result.pop_back();
+                }
+                if(!result.empty()){
+                    node->rest = result.back();
+                    result.pop_back();
+                }
+            }
+            result.emplace_back(node);
+        } else {
+            result.emplace_back(interim_result[i]);
+        }
+        --i;
+    }
+    std::reverse(result.begin(), result.end());
+    return result;
 }
 
-std::shared_ptr<HastNode> make_mask(const TokenTree& tree){
+std::shared_ptr<HastNode> HaskellModel::make_mask(const TokenTree& tree){
     std::shared_ptr<HastNode> node = HastNodeFactory::create_node(1).get_node();
     std::vector<std::shared_ptr<HastNode>> elements;
     for(auto const& elem : std::vector(tree.children.begin(), tree.children.end()-1)){
@@ -109,12 +186,14 @@ std::shared_ptr<HastNode> make_mask(const TokenTree& tree){
     }
     elements = apply_data_constructors(elements);
     std::string recursion_type = get<std::string>(tree.children[tree.children.size()-1]);
+
+    if(elements.empty()){
+        node->set_value(recursion_type);
+        return node;
+    }
+
     if(recursion_type == "[]"){
         node->type = HastNodeType::List;
-        if(elements.empty()){
-            node->set_value(recursion_type);
-            return node;
-        }
         std::shared_ptr<HastNode> cur = node;
         cur->first = elements[0];
         size_t i = 1, n = elements.size();
@@ -128,13 +207,14 @@ std::shared_ptr<HastNode> make_mask(const TokenTree& tree){
             i++;
         }
         cur->rest = HastNodeFactory::create_node(1).with_value("[]").get_node();
-    } else { //it is a () cause a mask can't have a {}
-              // so a tuple or a desugared list
+    } else { //it is a tuple cause a mask can't have a {}
         std::shared_ptr<HastNode> cur = node;
         cur->first = elements[0];
         size_t i = 1, n = elements.size();
-        if(n == 1)
-            return node;
+        if(n == 1){
+            return elements[0];
+        }
+
         if(elements[1]->value == ","){
             node->type = HastNodeType::Tuple;
             while(i < n){
@@ -147,28 +227,14 @@ std::shared_ptr<HastNode> make_mask(const TokenTree& tree){
                 cur->first = elements[i];
                 i++;
             }
-        } else if(elements[1]->value == ":"){
-            node->type = HastNodeType::List;
-            while(i < n){
-                if(elements[i]->value != ":")
-                    throw CustomException("Wrong list parsing in mask definition: \"" + elements[i]->value + "\" should have been a ':'");
-                i++;
-                cur->rest = HastNodeFactory::create_node(1).with_type(HastNodeType::List).get_node();
-                cur->rest->parent = cur;
-                cur = cur->rest;
-                cur->first = elements[i];
-                i++;
-            }
-            cur->parent->rest = cur->first;
-        //    cur->parent->rest->type = cur->parent->rest->type == HastNodeType::String ? HastNodeType::String : HastNodeType::List;
         } else {
-            throw CustomException("Error while parsing mask: \"" + elements[1]->value + "\" should have been a ',' or a ':'");
+            throw CustomException("Error while parsing mask: \"" + elements[1]->value + "\" should have been a ','");
         }
     }
     return node;
 }
 
-HAST_FULL_MASK build_full_function_mask(const TokenList& list){
+HAST_FULL_MASK HaskellModel::build_full_function_mask(const TokenList& list){
     std::pair<std::string, std::vector<std::shared_ptr<HastNode>>> result;
     if(list.empty())
         return result;
@@ -292,7 +358,7 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
         i++;
     }
     if(i < n && lines[i].empty()) i++;
-    while(i < n){
+    while(i < n  && !lines[i].empty()&& !lines[i].starts_with(":")){
         size_t first_space = lines[i].find(' ');
         size_t second_space = lines[i].find(' ', first_space+1);
 
@@ -310,6 +376,21 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
         oper_node->precedence = precedence;
         oper_node->value = oper_name;
         operators.insert({oper_name, oper_node});
+        i++;
+    }
+    if(i < n && lines[i].empty()) i++;
+    while(i < n  && !lines[i].empty()&& lines[i].starts_with(":")){
+        infix_data_constructors.insert(lines[i]);
+        i++;
+    }
+    if(i < n && lines[i].empty()) i++;
+    while(i < n){
+        size_t first_space = lines[i].find(' ');
+
+        std::string data_name = lines[i].substr(0,first_space);
+        std::string data_arity = lines[i].substr(first_space+1);
+        int arity = std::stoi(data_arity);
+        data_constructor_arity.insert({data_name, arity});
         i++;
     }
 }

@@ -16,7 +16,7 @@ int main() {
     auto files = getFilesToParse();
     for(auto &file : files){
         auto statements = fileParser.parse_file(file);
-        haskellModel.AddStatements(statements);
+        haskellModel.add_statements(statements);
     }
     return 0;
 }

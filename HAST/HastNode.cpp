@@ -53,6 +53,8 @@ void HastNode::set_value(const std::string &value) {
     this->value = value;
     if(value == "[]"){
         type = HastNodeType::List;
+    }else if(value == "()") {
+        type = HastNodeType::EmptyTuple;
     }else if(value.starts_with("\"")){
         type = HastNodeType::String;
     } else if(value.starts_with("\'")) {
@@ -65,6 +67,10 @@ void HastNode::set_value(const std::string &value) {
         type = HastNodeType::Int;
     } else if(value.length() > 0 && std::islower(value[0])){
         type = HastNodeType::Variable;
+    } else if(value.length() > 0 && std::isupper(value[0])){
+        type = HastNodeType::DataConstructor;
+    } else if(value.length() > 0 && value[0] == ':'){
+        type = HastNodeType::InfixDataConstructor;
     } else {
         type = HastNodeType::Any;
     }

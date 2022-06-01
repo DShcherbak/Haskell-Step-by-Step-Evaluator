@@ -22,13 +22,15 @@ class HaskellModel {
 public:
 
     std::string moduleName;
-    void AddStatements(std::vector<string> &statements);
+    void add_statements(std::vector<string> &statements);
 
     void read_prelude(const std::vector<std::string>& lines);
 
 private:
     std::map<std::string, HAST_FN> functions;
     std::map<std::string, HAST_ON> operators;
+    std::set<std::string> infix_data_constructors;
+    std::map<std::string, int> data_constructor_arity;
 
     std::vector<TokenTree> process_headers(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_data_types(const std::vector<TokenTree> &statements);
@@ -43,6 +45,14 @@ private:
     void add_data_structure(const TokenTree &tree);
 
     std::vector<std::tuple<TokenList, GuardVector>> add_function_arity(const std::vector<TokenTree> &trees);
+
+    std::vector<std::shared_ptr<HastNode>> apply_data_constructors(std::vector<std::shared_ptr<HastNode>> &list);
+
+    std::shared_ptr<HastNode> make_mask(const TokenNode &token);
+
+    std::shared_ptr<HastNode> make_mask(const TokenTree &tree);
+
+    std::pair<string, std::vector<std::shared_ptr<HastNode>>> build_full_function_mask(const TokenList &list);
 };
 
 

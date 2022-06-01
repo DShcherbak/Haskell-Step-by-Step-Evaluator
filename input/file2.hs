@@ -3,6 +3,15 @@
 import qualified Data.Set as Data.Bue
 import Data.List ( sort )
 
+superStrangeValue = NPN :+ 3 :+ 2: NPN :+ 3 :+2 :+ 1 : endList
+superStrangeValue2 = (:) ((:+) NPN 3 :+ 2)  (NPN :+ 3 :+2 :+ 1 : endList)
+
+superStrangeFunc (NPN :+ 3 :+ 2: NPN :+ 3 :+2 :+ 1 : []) = 1
+superStrangeFunc _ = 0
+
+addOper = (+)
+addOperList = [(+)]
+
 --[1,2,3]
 mySort :: [Int] -> [Int]
 mySort = sort
@@ -21,6 +30,11 @@ class GoodTypes a where
 instance GoodTypes Int where
     iAmGood x | even x = "We are good"
               | otherwise    = "I am good"
+
+data NoPleaseNo = NPN | NoPleaseNo :+ Int deriving Show
+
+endList = []
+
 
 
 testCaseForCase :: Maybe (Maybe [Char]) -> [Char]
@@ -108,7 +122,7 @@ doubleWhere a b = (x, t) where
 myLast :: [a] -> a
 myLast [] = error "Error"
 myLast [x] = x
-myLast (x:xs) =
+myLast ((:) x xs) =
     myLast xs
 
 myButLast :: [a] -> a
@@ -117,7 +131,6 @@ myButLast [x] = error "Error"
 myButLast [x, y] = x
 myButLast (x:xs) = myButLast xs
 
-data Number1 = Int :+ Int
 data Number2 = Int :$ Int
 data Number2D = Double :$$ Double
 data Number3 = Number2 :$$$ Number2

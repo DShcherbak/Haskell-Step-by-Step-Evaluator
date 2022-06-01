@@ -8,7 +8,10 @@
 
 #define HAST_N std::shared_ptr<HastNode>
 
-enum class HastNodeType{String, Char, Int, Double, Bool, List, Tuple, DataConstructor, Any, Variable};
+enum class HastNodeType{String, Char, Int, Double, Bool,
+                            List, Tuple, EmptyTuple, DataConstructor, InfixDataConstructor,
+                            Operator, PrefixOperator,
+                            Any, Variable};
 
 class HastNode {
 public:

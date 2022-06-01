@@ -319,6 +319,6 @@ namespace lines {
     }
 
     std::vector<std::string> HaskellFileParser::read_prelude() {
-        return get_lines_from_file("../input/Prelude.hs");
+        return get_lines_from_file("../input/Prelude1.hs");
     }
 }
