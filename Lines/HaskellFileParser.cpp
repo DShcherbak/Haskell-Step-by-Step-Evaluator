@@ -1,7 +1,7 @@
 #include <stack>
 #include <cassert>
 #include "HaskellFileParser.h"
-
+#include <cmath>
 namespace lines {
 
     bool is_operator(char c){
@@ -13,6 +13,9 @@ namespace lines {
     }
 
     string found_keyword(const std::string &line, size_t& id){
+        if(line.empty() || line.size() <= id)
+            return "";
+        std::cout << line << std::endl;
         size_t n = line.size();
         if(line[id] == '}'){
             return "}";
@@ -109,7 +112,7 @@ namespace lines {
             if (check_for_new_line_operators(key, lines, line_id, char_id, block_indent, do_let_special))
                 return;
 
-            for(; char_id < lines[line_id].parsed_line.size(); char_id++){
+            for(; line_id < lines_n && char_id < lines[line_id].parsed_line.size(); char_id++){
                 string new_key = found_keyword(lines[line_id].parsed_line, char_id);
                 if(!new_key.empty()){
                     if(new_key == "}"){
@@ -169,7 +172,7 @@ namespace lines {
 
     indent_vector remove_sugar_from_where(indent_vector &lines_with_indentation){
         for(size_t line_id = 0, lines_n = lines_with_indentation.size(); line_id < lines_n; line_id++){
-            for(size_t char_id = 0; char_id < lines_with_indentation[line_id].parsed_line.size(); char_id++){
+            for(size_t char_id = 0; line_id < lines_n && char_id < lines_with_indentation[line_id].parsed_line.size(); char_id++){
                 string key = found_keyword(lines_with_indentation[line_id].parsed_line, char_id);
                 if(!key.empty()){
                     recursively_parse_keyword(key, lines_with_indentation, line_id, char_id);
@@ -318,6 +321,4 @@ namespace lines {
     std::vector<std::string> HaskellFileParser::read_prelude() {
         return get_lines_from_file("../input/Prelude.hs");
     }
-
-
 }

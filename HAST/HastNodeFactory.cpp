@@ -4,11 +4,11 @@
 HastNodeFactory HastNodeFactory::create_node(int type) {
     HastNodeFactory factory{};
     if(type == 0){
-        factory.node = std::shared_ptr<HastNode>();
+        factory.node = std::make_shared<HastNode>();
     } else if (type == 1){
-        factory.node = std::shared_ptr<HastMaskNode>();
+        factory.node = std::make_shared<HastMaskNode>();
     } else if (type == 2){
-        factory.node = std::shared_ptr<HastOperatorNode>();
+        factory.node = std::make_shared<HastOperatorNode>();
     }
     return factory;
 }
@@ -24,6 +24,6 @@ HastNodeFactory HastNodeFactory::with_value(const std::string& val) {
 }
 
 std::shared_ptr<HastNode> HastNodeFactory::get_node() {
-    return node;
+    return this->node;
 }
 
