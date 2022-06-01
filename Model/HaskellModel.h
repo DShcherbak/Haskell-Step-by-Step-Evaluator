@@ -53,6 +53,18 @@ private:
     std::shared_ptr<HastNode> make_mask(const TokenTree &tree);
 
     std::pair<string, std::vector<std::shared_ptr<HastNode>>> build_full_function_mask(const TokenList &list);
+
+    std::vector<std::shared_ptr<HastNode>> apply_list_constructors(std::vector<std::shared_ptr<HastNode>> &list);
+
+    std::shared_ptr<HastNode> build_expression(const TokenList &list);
+
+    std::shared_ptr<HastNode> build_expression(const TokenNode &token);
+
+    std::vector<std::shared_ptr<HastNode>> apply_all_functions(const std::vector<std::shared_ptr<HastNode>> &list);
+
+
+    std::vector<std::shared_ptr<HastNode>>
+    apply_operators(std::vector<std::shared_ptr<HastNode>> &nodes, size_t from, size_t to);
 };
 
 

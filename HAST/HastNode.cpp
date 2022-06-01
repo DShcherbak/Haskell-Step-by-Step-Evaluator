@@ -43,8 +43,16 @@ std::string HastNode::type_to_str(HastNodeType type) {
             return "T";
         case HastNodeType::DataConstructor:
             return "D";
+        case HastNodeType::Operator:
+            return "O";
+        case HastNodeType::PrefixOperator:
+            return "Pref0";
+        case HastNodeType::InfixDataConstructor:
+            return "InfixD";
         case HastNodeType::Variable:
             return "V";
+        case HastNodeType::EmptyTuple:
+            return "()";
     }
     return "?";
 }
@@ -71,6 +79,8 @@ void HastNode::set_value(const std::string &value) {
         type = HastNodeType::DataConstructor;
     } else if(value.length() > 0 && value[0] == ':'){
         type = HastNodeType::InfixDataConstructor;
+    } else if(value.length() > 0 && (value[0] == '+' || value[0] == '-' || value[0] == '*' || value[0] == '/')){//TODO: is_operator
+        type = HastNodeType::Operator;
     } else {
         type = HastNodeType::Any;
     }

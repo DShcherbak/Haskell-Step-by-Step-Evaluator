@@ -12,9 +12,9 @@ class HastFunctionNode : public HastNode {
 public:
     size_t number_of_arguments = 0;
     bool has_guards = false;
-    std::vector<HastNode> arguments;
-    std::map<HastMaskNode, std::map<HastNode, HastNode>> guards;
-    std::map<HastMaskNode, HastNode> function_definitions;
+    std::vector<HAST_N> arguments;
+    std::map<std::shared_ptr<HastMaskNode>, std::map<HAST_N, HAST_N>> guards;
+    std::map<std::shared_ptr<HastMaskNode>, HAST_N> function_definitions;
 
     explicit HastFunctionNode();
 
