@@ -17,6 +17,7 @@ public:
     std::shared_ptr<HastNode> parent;
     std::string value;
     std::string name;
+    void set_value(const std::string& value);
     HastNodeType type;
     explicit HastNode()=default;
     explicit HastNode(HastNodeType type);

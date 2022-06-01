@@ -9,17 +9,19 @@ HastNodeFactory HastNodeFactory::create_node(int type) {
         factory.node = std::make_shared<HastMaskNode>();
     } else if (type == 2){
         factory.node = std::make_shared<HastOperatorNode>();
+    } else if (type == 3){
+        factory.node = std::make_shared<HastFunctionNode>();
     }
     return factory;
 }
 
 HastNodeFactory HastNodeFactory::with_type(HastNodeType type) {
-    node->type = type;
+    this->node->type = type;
     return *this;
 }
 
 HastNodeFactory HastNodeFactory::with_value(const std::string& val) {
-    this->node->value = val;
+    this->node->set_value(val);
     return *this;
 }
 

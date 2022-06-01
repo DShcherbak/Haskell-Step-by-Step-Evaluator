@@ -16,18 +16,7 @@ HastNode::HastNode(const TokenTree &tree) {
 }
 
 HastNode::HastNode(const std::string &value) {
-    this->value = value;
-    if(value.starts_with("\"")){
-        type = HastNodeType::String;
-    } else if(value.starts_with("\'")) {
-        type = HastNodeType::Char;
-    } else if (value == "True" || value == "False"){
-        type = HastNodeType::Bool;
-    } else if(value.find('.') != std::string::npos){
-        type = HastNodeType::Double;
-    } else {
-        type = HastNodeType::Int;
-    }
+    set_value(value);
 }
 
 HastNode::HastNode(HastNodeType type) {
@@ -58,4 +47,25 @@ std::string HastNode::type_to_str(HastNodeType type) {
             return "V";
     }
     return "?";
+}
+
+void HastNode::set_value(const std::string &value) {
+    this->value = value;
+    if(value == "[]"){
+        type = HastNodeType::List;
+    }else if(value.starts_with("\"")){
+        type = HastNodeType::String;
+    } else if(value.starts_with("\'")) {
+        type = HastNodeType::Char;
+    } else if (value == "True" || value == "False"){
+        type = HastNodeType::Bool;
+    } else if(value.find('.') != std::string::npos){
+        type = HastNodeType::Double;
+    } else if(value.length() > 0 && std::isdigit(value[0])){
+        type = HastNodeType::Int;
+    } else if(value.length() > 0 && std::islower(value[0])){
+        type = HastNodeType::Variable;
+    } else {
+        type = HastNodeType::Any;
+    }
 }

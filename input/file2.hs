@@ -1,4 +1,4 @@
-module Main where
+--module Main where
 
 import qualified Data.Set as Data.Bue
 import Data.List ( sort )
@@ -124,7 +124,7 @@ data Number3 = Number2 :$$$ Number2
 
 data SC = SomeCust Int Int Int | SomeCust' Int Int [Int]
 
-
+{-
 goodForNothing (1 :+ m, (('a', "(b,c)"),             ["d,e", _, n,
             '(' : 'f' : ",g)"], "( asd)" )) = "PARSED!"
 goodForNothing _ = "doesn't parse..."
@@ -147,7 +147,7 @@ parsingNames _ = Left "Something weird"
 parsingCusNamed (SomeCust 1 2 3) = 1
 parsingCusNamed (SomeCust' _ x [1,2,3]) = 2
 parsingCusNamed _ = 3
-
+-}
 
 
 guarded n | n > 0     = "Big"

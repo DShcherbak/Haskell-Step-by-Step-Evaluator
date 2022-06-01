@@ -8,7 +8,7 @@
 #define HAST_FN std::shared_ptr<HastFunctionNode>
 #define HAST_GUARD std::pair<HAST_N, HAST_N>
 
-class HastFunctionNode : HastNode {
+class HastFunctionNode : public HastNode {
 public:
     size_t number_of_arguments = 0;
     bool has_guards = false;

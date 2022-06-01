@@ -111,6 +111,10 @@ std::shared_ptr<HastNode> make_mask(const TokenTree& tree){
     std::string recursion_type = get<std::string>(tree.children[tree.children.size()-1]);
     if(recursion_type == "[]"){
         node->type = HastNodeType::List;
+        if(elements.empty()){
+            node->set_value(recursion_type);
+            return node;
+        }
         std::shared_ptr<HastNode> cur = node;
         cur->first = elements[0];
         size_t i = 1, n = elements.size();
@@ -123,10 +127,10 @@ std::shared_ptr<HastNode> make_mask(const TokenTree& tree){
             cur->first = elements[i];
             i++;
         }
+        cur->rest = HastNodeFactory::create_node(1).with_value("[]").get_node();
     } else { //it is a () cause a mask can't have a {}
               // so a tuple or a desugared list
         std::shared_ptr<HastNode> cur = node;
-
         cur->first = elements[0];
         size_t i = 1, n = elements.size();
         if(n == 1)
@@ -144,6 +148,7 @@ std::shared_ptr<HastNode> make_mask(const TokenTree& tree){
                 i++;
             }
         } else if(elements[1]->value == ":"){
+            node->type = HastNodeType::List;
             while(i < n){
                 if(elements[i]->value != ":")
                     throw CustomException("Wrong list parsing in mask definition: \"" + elements[i]->value + "\" should have been a ':'");
