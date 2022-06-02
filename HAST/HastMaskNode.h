@@ -8,6 +8,7 @@
 #define HAST_FULL_MASK std::pair<std::string, std::vector<std::shared_ptr<HastNode>>>
 
 class HastMaskNode : public HastNode{
+    std::pair<bool, std::map<std::string, HAST_N>> fits(const HAST_N& argument);
 };
 
 

@@ -1,5 +1,5 @@
 #include "HaskellModel.h"
-#include "../HAST/HastPrinter.h"
+#include "../HAST/Additional/HastPrinter.h"
 
 void HaskellModel::add_statements(std::vector<string> &statements) {
     auto token_tree_vector = Lexer::functions_to_tokens(statements);

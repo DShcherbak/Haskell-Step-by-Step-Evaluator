@@ -3,10 +3,10 @@
 
 
 #include <memory>
-#include "HastNode.h"
-#include "HastMaskNode.h"
-#include "HastOperatorNode.h"
-#include "HastFunctionNode.h"
+#include "../HastNode.h"
+#include "../HastMaskNode.h"
+#include "../HastOperatorNode.h"
+#include "../HastFunctionNode.h"
 
 class HastNodeFactory {
 private:

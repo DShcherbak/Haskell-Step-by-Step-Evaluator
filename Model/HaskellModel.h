@@ -2,7 +2,6 @@
 #define HASKELL_STEP_BY_STEP_EVALUATOR_HASKELLMODEL_H
 #include <string>
 #include <fstream>
-#include "HaskellFunction/Function.h"
 #include <vector>
 #include <tuple>
 #include <iostream>
@@ -13,7 +12,7 @@
 #include "../Exception/IncorrectTokenException.h"
 #include "../HAST/HastFunctionNode.h"
 #include "../HAST/HastOperatorNode.h"
-#include "../HAST/HastNodeFactory.h"
+#include "../HAST/Additional/HastNodeFactory.h"
 
 typedef std::vector<TokenNode> TokenList;
 typedef std::vector<std::pair<TokenList, TokenList>> GuardVector;

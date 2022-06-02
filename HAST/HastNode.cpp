@@ -85,3 +85,8 @@ void HastNode::set_value(const std::string &value) {
         type = HastNodeType::Any;
     }
 }
+
+std::shared_ptr<HastNode> HastNode::compute_fully() {
+    return std::shared_ptr<HastNode>();
+}
+

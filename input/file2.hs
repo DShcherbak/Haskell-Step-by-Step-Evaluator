@@ -12,12 +12,12 @@ hardComment "{-" = "{-" {- -- hello a {- tricccccky -} comment here -}
             ++ "{-"
 hardComment x = "Passed"
 
-goodForNothing (1 :+ m, (('a', "(b,c)"),             ["d,e", _, n,
-            '(' : 'f' : ",g)"], "( asd)" )) = "PARSED!"
-goodForNothing _ = "doesn't parse..."
+--goodForNothing (1 :+ m, (('a', "(b,c)"),             ["d,e", _, n,
+--            '(' : 'f' : ",g)"], "( asd)" )) = "PARSED!"
+--goodForNothing _ = "doesn't parse..."
 
-goodForAll ((:+) 1 2) (3 :+ 4) = 10
-goodForAll _ _ = 9
+--goodForAll ((:+) 1 2) (3 :+ 4) = 10
+--goodForAll _ _ = 9
 
 complexWhere' :: Num a => a -> a -> a -> a
 complexWhere' x y z = let{a = t1 + t2 where{t1 = x ;t2 = y}} in let{b = t3 + a where{t3 = z}} in b ^ q where{q = b2 - b1 - kk where{b1 = 1; b2 = 2; kk = 1} ;kk = 0}
@@ -177,6 +177,9 @@ useDataList = Data.Bue.foldl (+) 0.Data.Bue.map (+1).Data.Bue.fromList
 
 useDataList' :: Data.Bue.Set Double -> Double
 useDataList' = Data.Bue.foldl (*) 2.3 . Data.Bue.map (+5)
+
+
+recursiveLetWhere x = let f 0 = 0; f a = g (a-1) in f x where g 0 = 0; g b = g (b-1)
 
 
 --f :: Int -> Int 

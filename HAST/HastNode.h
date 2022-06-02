@@ -2,6 +2,7 @@
 #define HASKELL_STEP_BY_STEP_EVALUATOR_HASTNODE_H
 
 #include <memory>
+#include <map>
 #include "../Lexer/TokenTree.h"
 
 //Haskell Abstract Tree Node
@@ -29,6 +30,11 @@ public:
     explicit HastNode(const TokenNode& tree);
 
     static std::string type_to_str(HastNodeType type);
+
+
+    std::shared_ptr<HastNode> compute_fully();
+
+
 };
 
 

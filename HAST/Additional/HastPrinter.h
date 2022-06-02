@@ -3,7 +3,7 @@
 
 
 #include <memory>
-#include "HastNode.h"
+#include "../HastNode.h"
 
 class HastPrinter {
 public:

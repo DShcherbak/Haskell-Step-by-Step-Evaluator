@@ -1,38 +1,57 @@
 #include <iostream>
+#include <map>
 #include "Mask.h"
+#include "../../HAST/Additional/HastNodeFactory.h"
 
-
-// f a b ('c':('d':"e")) with no '=' at the end
-
-
-
-function::Mask::Mask(const std::string& mask_string) {
-    using std::string, std::vector;
-
-    auto line_elements = PartiallyParsedString::split_by_space(mask_string);
-    auto good_lines = std::vector<PartiallyParsedString>();
-    for(int i = 1, n = (int) line_elements.size(); i < n; i++){
-        if(!line_elements[i].line.empty())
-            good_lines.push_back(line_elements[i]);
+std::shared_ptr<HastNode> apply_variables(const std::shared_ptr<HastNode>& body_node, std::map<std::string, HAST_N> mask_declarations){
+    if(body_node == nullptr){
+        return body_node;
     }
-    for(auto& line_element : good_lines){
-        std::cout << mask_string << std::endl;
-        auto line_template = PartiallyParsedString::parse_line(line_element);
-        line_template->count_body();
-        templates.emplace_back(line_template);
+    if(body_node->type == HastNodeType::Variable){
+        assert(mask_declarations.contains(body_node->value));
+        return mask_declarations[body_node->value];
+    } else {
+        auto result = HastNodeFactory::create_node(0).with_value(body_node->value).get_node();
+        result->first = apply_variables(body_node->first, mask_declarations);
+        result->rest = apply_variables(body_node->rest, mask_declarations);
+        return result;
     }
-    if(!templates.empty()){
-        for(auto temp : templates){
-            temp->print_template();
+}
+
+std::shared_ptr<HastNode> function::Mask::apply_args(const std::vector<std::shared_ptr<HastNode>> &arguments) {
+    assert(arguments.size() == argument_templates.size());
+    std::map<std::string, HAST_N> mask_declarations;
+    for(int i = 0, n = (int) arguments.size(); i < n; i++){
+        std::pair<bool, std::map<std::string, HAST_N>> mask_result = argument_templates[i]->fits(arguments[i]);
+        if(!mask_result.first)
+            return nullptr;
+        for(auto const & mask_variable : mask_result.second){
+            mask_declarations.insert(mask_variable);
         }
     }
+    if(this->body_node != nullptr){
+        return apply_variables(body_node, mask_declarations);
+    } else { //guards
+        for(auto & guard_pairs : this->guards){
+            auto guard_condition = guard_pairs.first;
+            guard_condition = apply_variables(guard_condition, mask_declarations);
+            auto guard_result = guard_condition->compute_fully();
+            if(guard_result->value == "True")
+                return apply_variables(guard_pairs.second, mask_declarations);
+
+        }
+    }
+    return nullptr;
 }
 
-void function::Mask::add_guard(const std::string &guard_head, const std::string &guard_body) {
-    has_guards = true;
-    guards.emplace_back(std::make_shared<function::Guard>(guard_head, guard_body));
+void function::Mask::add_body(const std::shared_ptr<HastNode> &body) {
+    body_node = body;
 }
 
-void function::Mask::add_body(const std::string &body_string) {
-    body = std::make_shared<function::Body>(body_string);
+void function::Mask::add_guards(const  std::vector<std::pair<HAST_N, HAST_N>>& guards) {
+    this->guards = guards;
+}
+
+void function::Mask::add_arg_templates(const std::vector<std::shared_ptr<HastNode>> &arg_templates) {
+    this->argument_templates = arg_templates;
 }
