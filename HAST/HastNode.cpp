@@ -87,6 +87,7 @@ void HastNode::set_value(const std::string &value) {
 }
 
 std::shared_ptr<HastNode> HastNode::compute_fully() {
-    return std::shared_ptr<HastNode>();
+    return std::make_shared<HastNode>();
 }
+
 

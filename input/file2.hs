@@ -147,6 +147,9 @@ data NoPleaseNo = NPN | NoPleaseNo :+ Int deriving Show
 
 endList = []
 
+letInGuard x | let{ p = mod t 2 where {t = x} }in p == 0 = x+1
+             | otherwise                                 = x - 1
+
 
 superStrangeValue = NPN :+ 3 :+ 2: NPN :+ 3 :+2 :+ 1 : endList
 superStrangeValue2 = (:) ((:+) NPN 3 :+ 2)  (NPN :+ 3 :+2 :+ 1 : endList)
