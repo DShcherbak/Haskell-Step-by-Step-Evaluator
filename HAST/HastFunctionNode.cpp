@@ -39,7 +39,7 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_all_functions(Has
 
     while(i < n){
         if(nodes[i]->type == HastNodeType::Variable && model.functions.contains(nodes[i]->value)){
-            auto node = model.functions[nodes[i]->value];
+            auto node = HastNodeFactory::create_node(model.functions[nodes[i]->value]).get_func_node();
             size_t arity = node->number_of_arguments;
             while(arity > 0){
                 ++i;

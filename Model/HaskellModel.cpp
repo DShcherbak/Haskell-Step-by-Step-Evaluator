@@ -100,8 +100,8 @@ std::shared_ptr<HastMaskNode> HaskellModel::make_mask(const TokenTree& tree){
     for(auto const& elem : std::vector(tree.children.begin(), tree.children.end()-1)){
         elements.emplace_back(make_mask(elem));
     }
-    elements = apply_data_constructors(elements);
-    elements = apply_list_constructors(elements);
+    elements = HastFunctionNode::apply_data_constructors(*this, elements);
+    elements = HastFunctionNode::apply_list_constructors(elements);
     std::string recursion_type = get<std::string>(tree.children[tree.children.size()-1]);
 
     if(elements.empty()){
@@ -173,7 +173,6 @@ void HaskellModel::process_functions(const std::vector<TokenTree>& trees) {
 
         std::string func_name = mask.first;
         auto func = get_or_create_function(func_name);
-        std::cout << "BODY OF " << func_name << " :" << std::endl;
 
         if(bodies.size() == 1 && bodies[0].first.empty()){ //has no guards
            // HastPrinter::print_node(body);
@@ -312,15 +311,5 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
         data_constructor_arity.insert({data_name, arity});
         i++;
     }
-}
-
-std::vector<std::shared_ptr<HastNode>>
-HaskellModel::apply_data_constructors(const std::vector<std::shared_ptr<HastNode>> &nodes) {
-    return nodes;
-}
-
-std::vector<std::shared_ptr<HastNode>>
-HaskellModel::apply_list_constructors(const std::vector<std::shared_ptr<HastNode>> &nodes) {
-    return nodes;
 }
 
