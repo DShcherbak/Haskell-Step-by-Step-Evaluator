@@ -1,6 +1,10 @@
 #ifndef HASKELL_STEP_BY_STEP_EVALUATOR_MASK_H
 #define HASKELL_STEP_BY_STEP_EVALUATOR_MASK_H
 
+namespace function{
+    class Mask;
+}
+
 #include <memory>
 #include <vector>
 #include "MaskTemplate.h"

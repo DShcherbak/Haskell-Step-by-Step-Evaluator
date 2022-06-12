@@ -1,6 +1,8 @@
 #ifndef HASKELL_STEP_BY_STEP_EVALUATOR_HASTFUNCTIONNODE_H
 #define HASKELL_STEP_BY_STEP_EVALUATOR_HASTFUNCTIONNODE_H
 
+class HaskellModel;
+
 #include <map>
 #include "HastNode.h"
 #include "HastMaskNode.h"

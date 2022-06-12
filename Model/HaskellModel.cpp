@@ -314,3 +314,13 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
     }
 }
 
+std::vector<std::shared_ptr<HastNode>>
+HaskellModel::apply_data_constructors(const std::vector<std::shared_ptr<HastNode>> &nodes) {
+    return nodes;
+}
+
+std::vector<std::shared_ptr<HastNode>>
+HaskellModel::apply_list_constructors(const std::vector<std::shared_ptr<HastNode>> &nodes) {
+    return nodes;
+}
+

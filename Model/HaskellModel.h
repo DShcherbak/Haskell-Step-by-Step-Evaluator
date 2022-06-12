@@ -1,5 +1,8 @@
 #ifndef HASKELL_STEP_BY_STEP_EVALUATOR_HASKELLMODEL_H
 #define HASKELL_STEP_BY_STEP_EVALUATOR_HASKELLMODEL_H
+
+class HastFunctionNode;
+
 #include <string>
 #include <fstream>
 #include <vector>
@@ -35,7 +38,7 @@ private:
     std::vector<TokenTree> process_type_classes(const std::vector<TokenTree> &statements);
     void process_functions(const std::vector<TokenTree> &statements);
 
-    HAST_FN get_or_create_function(const std::string &name);
+    std::shared_ptr<HastFunctionNode> get_or_create_function(const std::string &name);
 
     void setName(const std::string &name);
     void addImportToModel(const std::vector<TokenNode> &import);

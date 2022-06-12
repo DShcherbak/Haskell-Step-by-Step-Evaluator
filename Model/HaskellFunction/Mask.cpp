@@ -23,7 +23,7 @@ std::shared_ptr<HastNode> function::Mask::apply_args(const std::vector<std::shar
     assert(arguments.size() == argument_templates.size());
     std::map <std::string, HAST_N> mask_declarations;
     for (int i = 0, n = (int) arguments.size(); i < n; i++) {
-        std::pair<bool, std::map<std::string, HAST_N>> mask_result = argument_templates[i]->fits(arguments[i]);
+        std::pair<bool, std::map<std::string, HAST_N>> mask_result = {false, {}};//argument_templates[i]->fits(arguments[i]);
         if (!mask_result.first)
             return nullptr;
         for (auto const &mask_variable: mask_result.second) {
