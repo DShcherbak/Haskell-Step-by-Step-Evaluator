@@ -313,3 +313,20 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
     }
 }
 
+bool HaskellModel::parse_expression(std::string basicString) {
+    temporary_countdown = 5;
+    return true;
+}
+
+std::string HaskellModel::current_expression() {
+    return std::to_string(temporary_countdown--);
+}
+
+bool HaskellModel::expression_not_week_normal_form() {
+    return temporary_countdown > 3;
+}
+
+bool HaskellModel::expression_not_reduced() {
+    return temporary_countdown > 0;
+}
+

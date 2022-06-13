@@ -30,8 +30,15 @@ public:
     void add_statements(std::vector<std::string> &statements);
     void read_prelude(const std::vector<std::string>& lines);
 
-private:
+    bool parse_expression(std::string basicString);
 
+    std::string current_expression();
+
+    bool expression_not_week_normal_form();
+    bool expression_not_reduced();
+
+private:
+    int temporary_countdown;
 
     std::vector<TokenTree> process_headers(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_data_types(const std::vector<TokenTree> &statements);
