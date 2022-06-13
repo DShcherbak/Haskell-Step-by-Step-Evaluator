@@ -4,6 +4,21 @@ CommandController::CommandController(HaskellModel &model) {
     this->model = model;
 }
 
+ControllerCommand CommandController::get_command(){
+    std::string string_command = "";
+    std::cout << "Insert command: ";
+    std::cin >> string_command;
+    if(string_command == "0"){
+        return ControllerCommand::STEP_IN;
+    } else if (string_command == "1"){
+        return ControllerCommand::STEP_FORWARD;
+    } else if (string_command == "2"){
+        return ControllerCommand::STEP_OUT;
+    } else {
+        return ControllerCommand::BAD_COMMAND;
+    }
+}
+
 void CommandController::perform_commands(){
     while(true){
         std::cout << "Enter expression or \":q\" to quit." << std::endl;
@@ -19,6 +34,11 @@ void CommandController::perform_commands(){
                 continue;
             }
             do{
+                auto command = get_command();
+                if(command != ControllerCommand::BAD_COMMAND){
+                    model.perform_command(command);
+                }
+
                 std::cout << model.current_expression() << std::endl;
             }while(model.expression_not_week_normal_form());
 
@@ -32,6 +52,8 @@ void CommandController::perform_commands(){
                 continue;
             }
             do{
+                auto command = get_command();
+                model.perform_command(command);
                 std::cout << model.current_expression() << std::endl;
             }while(model.expression_not_reduced());
         }

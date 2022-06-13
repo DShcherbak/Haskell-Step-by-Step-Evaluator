@@ -314,19 +314,36 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
 }
 
 bool HaskellModel::parse_expression(std::string basicString) {
-    temporary_countdown = 5;
+    temporary_countdown = "|||||";
     return true;
 }
 
 std::string HaskellModel::current_expression() {
-    return std::to_string(temporary_countdown--);
+    return temporary_countdown;
 }
 
 bool HaskellModel::expression_not_week_normal_form() {
-    return temporary_countdown > 3;
+    return temporary_countdown.length() > 3;
 }
 
 bool HaskellModel::expression_not_reduced() {
-    return temporary_countdown > 0;
+    return temporary_countdown.length() == 0;
+}
+
+void HaskellModel::perform_command(ControllerCommand command){
+    switch(command){
+        case ControllerCommand::BAD_COMMAND:
+            return;
+        case ControllerCommand::STEP_FORWARD:
+            temporary_countdown = temporary_countdown.substr(0, temporary_countdown.length()-1);
+            return;
+        case ControllerCommand::STEP_IN:
+            temporary_countdown = temporary_countdown.append(temporary_countdown);
+            temporary_countdown = temporary_countdown.append(temporary_countdown);
+            return;
+        case ControllerCommand::STEP_OUT:
+            temporary_countdown = temporary_countdown.substr(0, temporary_countdown.length()/4);
+            return;
+    }
 }
 

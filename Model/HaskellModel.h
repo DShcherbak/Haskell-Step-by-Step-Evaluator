@@ -16,6 +16,7 @@ class HastFunctionNode;
 #include "../HAST/HastFunctionNode.h"
 #include "../HAST/HastOperatorNode.h"
 #include "../HAST/Additional/HastNodeFactory.h"
+#include "../CommandController/ControllerCommand.h"
 
 typedef std::vector<TokenNode> TokenList;
 typedef std::vector<std::pair<TokenList, TokenList>> GuardVector;
@@ -37,8 +38,10 @@ public:
     bool expression_not_week_normal_form();
     bool expression_not_reduced();
 
+    void perform_command(ControllerCommand command);
+
 private:
-    int temporary_countdown;
+    std::string temporary_countdown;
 
     std::vector<TokenTree> process_headers(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_data_types(const std::vector<TokenTree> &statements);
