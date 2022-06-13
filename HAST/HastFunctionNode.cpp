@@ -209,6 +209,7 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_data_constructors
     }
     return result;
 }
+
 std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors(const std::vector<std::shared_ptr<HastNode>>&nodes) {
     //special case for desugared lists, since they are not completely desugared, as it turns out
     std::vector<HAST_N> result;
@@ -238,7 +239,45 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors
         }
         --i;
     }
+    std::vector<std::shared_ptr<HastNode>> parsed_sugared_list;
     std::reverse(result.begin(), result.end());
-    return result;
+    auto type = HastNodeType::List;
+    i = (int) result.size()-1;
+    if(result[i]->value == "[]"){
+        type = HastNodeType::List;
+    }
+    else if (result[i]->value == "()"){
+        type = HastNodeType::Tuple;
+    } else {
+        return result;
+    }
+    i--;
+    while(i >= 0) {
+        if(result[i]->value == ",") {
+            auto node = HastNodeFactory::create_node(1).with_type(type).get_node();
+            if(result[i]->type == HastNodeType::InfixDataConstructor) {
+                if(!result.empty()){
+                    node->rest = result.back();
+                    parsed_sugared_list.pop_back();
+                }
+                if(i > 0) node->first = result[--i];
+            } else {
+                if(!parsed_sugared_list.empty()){
+                    node->first = result.back();
+                    parsed_sugared_list.pop_back();
+                }
+                if(!parsed_sugared_list.empty()){
+                    node->rest = parsed_sugared_list.back();
+                    parsed_sugared_list.pop_back();
+                }
+            }
+            parsed_sugared_list.emplace_back(node);
+        } else {
+            parsed_sugared_list.emplace_back(result[i]);
+        }
+        --i;
+    }
+    std::reverse(parsed_sugared_list.begin(), parsed_sugared_list.end());
+    return parsed_sugared_list;
 }
 

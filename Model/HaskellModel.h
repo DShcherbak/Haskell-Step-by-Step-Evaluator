@@ -31,9 +31,9 @@ public:
     void add_statements(std::vector<std::string> &statements);
     void read_prelude(const std::vector<std::string>& lines);
 
-    bool parse_expression(std::string basicString);
+    bool parse_expression(const std::string& basicString);
 
-    std::string current_expression();
+    std::string get_current_expression();
 
     bool expression_not_week_normal_form();
     bool expression_not_reduced();
@@ -42,6 +42,7 @@ public:
 
 private:
     std::string temporary_countdown;
+    std::shared_ptr<HastNode> current_expression;
 
     std::vector<TokenTree> process_headers(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_data_types(const std::vector<TokenTree> &statements);

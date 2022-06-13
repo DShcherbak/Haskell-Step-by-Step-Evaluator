@@ -23,7 +23,7 @@ void CommandController::perform_commands(){
     while(true){
         std::cout << "Enter expression or \":q\" to quit." << std::endl;
         std::string expression = "map (+1) [1,2,3]";
-        std::cin >> expression;
+        std::getline(std::cin, expression);
 
         if(expression == ":q"){
             break;
@@ -39,7 +39,7 @@ void CommandController::perform_commands(){
                     model.perform_command(command);
                 }
 
-                std::cout << model.current_expression() << std::endl;
+                std::cout << model.get_current_expression() << std::endl;
             }while(model.expression_not_week_normal_form());
 
             std::string yn = "Q";
@@ -53,8 +53,10 @@ void CommandController::perform_commands(){
             }
             do{
                 auto command = get_command();
-                model.perform_command(command);
-                std::cout << model.current_expression() << std::endl;
+                if(command != ControllerCommand::BAD_COMMAND){
+                    model.perform_command(command);
+                }
+                std::cout << model.get_current_expression() << std::endl;
             }while(model.expression_not_reduced());
         }
     }

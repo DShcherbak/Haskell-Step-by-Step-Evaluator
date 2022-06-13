@@ -182,19 +182,20 @@ namespace lines {
         return lines_with_indentation;
     }
 
-    std::vector<std::string> HaskellFileParser::parse_file(const std::string &file_name) {
-        std::vector<std::string> lines;
-        lines = get_lines_from_file(file_name);
+    std::vector<std::string> HaskellFileParser::parse_lines(std::vector<std::string> &lines) {
         lines = preprocess_lines(lines);
-
         indent_vector lines_with_indentation = indentation(lines);
         indent_vector lines_without_comments = remove_comments(lines_with_indentation);
         indent_vector lines_with_desugared_where = remove_sugar_from_where(lines_without_comments);
         std::vector<string> statements = compress_lines(lines_with_desugared_where);
-/*        for(auto &st : statements){
-            std::cout << st << std::endl;
-        }*/
         return statements;
+
+    }
+
+    std::vector<std::string> HaskellFileParser::parse_file(const std::string &file_name) {
+        std::vector<std::string> lines;
+        lines = get_lines_from_file(file_name);
+        return HaskellFileParser::parse_lines(lines);
     }
 
 

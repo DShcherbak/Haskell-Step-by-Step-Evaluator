@@ -12,11 +12,11 @@ int main() {
     HaskellModel haskellModel{};
     lines::HaskellFileParser fileParser{};
 
-    haskellModel.read_prelude(fileParser.read_prelude());
+    haskellModel.read_prelude(lines::HaskellFileParser::read_prelude());
 
     auto files = getFilesToParse();
     for(auto &file : files){
-        auto statements = fileParser.parse_file(file);
+        auto statements = lines::HaskellFileParser::parse_file(file);
         haskellModel.add_statements(statements);
     }
 

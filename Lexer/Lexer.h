@@ -18,6 +18,8 @@
 class Lexer {
 public:
     static std::vector<TokenTree> functions_to_tokens(const std::vector<std::string>& text);
+
+    static std::vector<TokenNode> functions_to_nodes(const std::vector<std::string> &functions);
 };
 
 

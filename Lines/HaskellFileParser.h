@@ -21,17 +21,20 @@ namespace lines {
     public:
         HaskellFileParser()= default;
 
-        std::vector<std::string> parse_file(const std::string& file_name);
+        static std::vector<std::string> parse_file(const std::string& file_name);
+        static std::vector<string> parse_lines(std::vector<std::string> &file_name);
 
-        std::vector<std::string> read_prelude();
+        static std::vector<std::string> read_prelude();
 
     private:
-        std::vector<std::string> preprocess_lines(const std::vector<string> &lines);
-        indent_vector indentation(const std::vector<std::string> &lines);
-        std::vector<std::string> get_lines_from_file(const std::string &file_name);
+        static std::vector<std::string> preprocess_lines(const std::vector<string> &lines);
+        static indent_vector indentation(const std::vector<std::string> &lines);
+        static std::vector<std::string> get_lines_from_file(const std::string &file_name);
         static std::vector <std::string> compress_lines(const std::vector <lines::IndentedLine> &lines);
 
-        std::vector <IndentedLine> remove_comments(const std::vector <lines::IndentedLine> &lines);
+        static std::vector <IndentedLine> remove_comments(const std::vector <lines::IndentedLine> &lines);
+
+
     };
 }
 

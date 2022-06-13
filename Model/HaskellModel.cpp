@@ -167,7 +167,7 @@ void HaskellModel::process_functions(const std::vector<TokenTree>& trees) {
     auto function_expression_vector = add_function_arity(trees);
     for(auto const& expr : function_expression_vector){
         auto mask = build_full_function_mask(std::get<0>(expr));
-        for(auto const& node : mask.second )
+        for(auto const& node : mask.second)
             HastPrinter::print_node(node);
         auto bodies = std::get<1>(expr);
 
@@ -313,12 +313,21 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
     }
 }
 
-bool HaskellModel::parse_expression(std::string basicString) {
+bool HaskellModel::parse_expression(const std::string& basicString) {
+    std::vector<std::string> line;
+    line.emplace_back(basicString);
+    auto tokens = lines::HaskellFileParser::parse_lines(line);
+    std::vector<TokenNode> trees = Lexer::functions_to_nodes(tokens);
+    std::shared_ptr<HastNode> node;
+    node = HastFunctionNode::build_expression_from_list(*this, trees);
+    HastPrinter::print_node(node);
+
+
     temporary_countdown = "|||||";
     return true;
 }
 
-std::string HaskellModel::current_expression() {
+std::string HaskellModel::get_current_expression() {
     return temporary_countdown;
 }
 
@@ -327,7 +336,7 @@ bool HaskellModel::expression_not_week_normal_form() {
 }
 
 bool HaskellModel::expression_not_reduced() {
-    return temporary_countdown.length() == 0;
+    return temporary_countdown.length() > 0;
 }
 
 void HaskellModel::perform_command(ControllerCommand command){

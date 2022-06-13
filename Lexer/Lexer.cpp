@@ -34,3 +34,12 @@ std::vector<TokenTree> Lexer::functions_to_tokens(const std::vector<std::string>
     }
     return result;
 }
+
+std::vector<TokenNode> Lexer::functions_to_nodes(const std::vector<std::string> &functions) {
+    auto trees = functions_to_tokens(functions);
+    std::vector<TokenNode> nodes;
+    for(auto & tree : trees){
+        nodes.emplace_back(tree);
+    }
+    return nodes;
+}
