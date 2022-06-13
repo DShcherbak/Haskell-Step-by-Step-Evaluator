@@ -39,11 +39,13 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_all_functions(Has
 
     while(i < n){
         if(nodes[i]->type == HastNodeType::Variable && model.functions.contains(nodes[i]->value)){
-            auto node = HastNodeFactory::create_node(model.functions[nodes[i]->value]).get_func_node();
-            size_t arity = node->number_of_arguments;
+            std::shared_ptr<HastNode> node = HastNodeFactory::create_node(model.functions[nodes[i]->value]).get_node();
+
+            size_t arity = node->function_call->arity;
             while(arity > 0){
                 ++i;
-                node->arguments.push_back(nodes[i]);
+                --arity;
+                node->function_call->arguments.push_back(nodes[i]);
             }
             result.emplace_back(node);
         } else {
@@ -125,6 +127,7 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_operators(Haskell
             i--;
         }
         nodes = result;
+        std::reverse(nodes.begin(), nodes.end());
     }
     return nodes;
 }
@@ -146,7 +149,11 @@ std::shared_ptr<HastNode> HastFunctionNode::build_expression_from_list(HaskellMo
     nodes = apply_list_constructors(nodes);
     nodes = apply_operators(model,nodes, 1, 5);
     nodes = apply_declaration(nodes);
+    if(nodes.size() == 2 && nodes[1]->value == "()"){
+        nodes.pop_back();
+    }
     assert(nodes.size() == 1);
+    HastPrinter::print_node(nodes[0]);
     return nodes[0];
 }
 

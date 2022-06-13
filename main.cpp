@@ -3,7 +3,7 @@
 #include "Model/HaskellModel.h"
 
 auto getFilesToParse() -> std::vector<std::string>{
-    return {"../input/file2.hs"};
+    return {"../input/file3.hs"};
 }
 
 int main() {

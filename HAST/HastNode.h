@@ -1,6 +1,8 @@
 #ifndef HASKELL_STEP_BY_STEP_EVALUATOR_HASTNODE_H
 #define HASKELL_STEP_BY_STEP_EVALUATOR_HASTNODE_H
 
+class HastFunctionCallNode;
+
 #include <memory>
 #include <map>
 #include "../Lexer/TokenTree.h"
@@ -12,13 +14,15 @@
 enum class HastNodeType{String, Char, Int, Double, Bool,
                             List, Tuple, EmptyTuple, DataConstructor, InfixDataConstructor,
                             Operator, PrefixOperator,
-                            Any, Variable};
+                            Any, Variable, FunctionCall};
 
 class HastNode {
 public:
     std::shared_ptr<HastNode> first;
     std::shared_ptr<HastNode> rest;
     std::shared_ptr<HastNode> parent;
+    std::shared_ptr<HastFunctionCallNode> function_call;
+
     std::string value;
     std::string name;
     void set_value(const std::string& value);
@@ -36,6 +40,7 @@ public:
 
 
 };
+
 
 
 

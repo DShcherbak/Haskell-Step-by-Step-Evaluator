@@ -4,6 +4,7 @@
 
 #include <memory>
 #include "../HastNode.h"
+#include "../HastFunctionCallNode.h"
 
 class HastPrinter {
 public:

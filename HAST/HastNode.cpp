@@ -53,6 +53,8 @@ std::string HastNode::type_to_str(HastNodeType type) {
             return "V";
         case HastNodeType::EmptyTuple:
             return "()";
+        case HastNodeType::FunctionCall:
+            return "F";
     }
     return "?";
 }
@@ -69,7 +71,7 @@ void HastNode::set_value(const std::string &value) {
         type = HastNodeType::Char;
     } else if (value == "True" || value == "False"){
         type = HastNodeType::Bool;
-    } else if(value.find('.') != std::string::npos){
+    } else if(value.find('.') != std::string::npos && std::isdigit(value[0])){
         type = HastNodeType::Double;
     } else if(value.length() > 0 && std::isdigit(value[0])){
         type = HastNodeType::Int;
@@ -79,7 +81,9 @@ void HastNode::set_value(const std::string &value) {
         type = HastNodeType::DataConstructor;
     } else if(value.length() > 0 && value[0] == ':'){
         type = HastNodeType::InfixDataConstructor;
-    } else if(value.length() > 0 && (value[0] == '+' || value[0] == '-' || value[0] == '*' || value[0] == '/')){//TODO: is_operator
+    } else if(value.length() > 0 && (value[0] == '+' || value[0] == '-' || value[0] == '*'
+    || value[0] == '/'  || value[0] == '>'  || value[0] == '<' || value[0] == '='
+                           || value[0] == '.')){//TODO: is_operator
         type = HastNodeType::Operator;
     } else {
         type = HastNodeType::Any;

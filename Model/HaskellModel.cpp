@@ -12,9 +12,9 @@ void HaskellModel::add_statements(std::vector<std::string> &statements) {
     std::cout << functions.size() << std::endl;
 }
 
-HAST_FN HaskellModel::get_or_create_function(const std::string &name) {
+std::shared_ptr<HastFunctionNode> HaskellModel::get_or_create_function(const std::string &name) {
     if(!functions.contains(name)){
-        HAST_FN func_node = std::make_shared<HastFunctionNode>();
+        std::shared_ptr<HastFunctionNode> func_node = std::make_shared<HastFunctionNode>();
         functions.insert({name, func_node});
     }
     return functions[name];
@@ -52,7 +52,7 @@ std::tuple<TokenList, GuardVector> process_guards(const TokenTree& tree){
     while(guard_position < n){
         TokenList guard_expression = TokenList(list_begin+guard_position+1, list_begin+eq_position);
         TokenList guard_body = TokenList(list_begin+eq_position+1, list_begin+next_guard_position);
-        std::get<1>(result).emplace_back(std::pair<TokenList, TokenList>(guard_position, guard_body));
+        std::get<1>(result).emplace_back(std::pair<TokenList, TokenList>(guard_expression, guard_body));
         guard_position = next_guard_position;
         eq_position = find_next_token(tree.children, "=", guard_position+1);
         next_guard_position = find_next_token(tree.children, "|", guard_position+1);
@@ -69,7 +69,7 @@ std::vector<std::tuple<TokenList, GuardVector>> HaskellModel::add_function_arity
         if(function_mask.empty() || function_mask[0].which() == 0)
             continue;
         std::string function_name = get<std::string>(function_mask[0]);
-        HAST_FN fn = get_or_create_function(function_name);
+        std::shared_ptr<HastFunctionNode> fn = get_or_create_function(function_name);
         fn->number_of_arguments = function_mask.size()-1;
     }
     for(const auto& f : functions){
@@ -270,7 +270,7 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
         std::string func_name = lines[i].substr(0,lines[i].find(' '));
         std::string func_arity = lines[i].substr(lines[i].find(' ')+1);
         int arity = std::stoi(func_arity);
-        HAST_FN func_node = std::make_shared<HastFunctionNode>();
+        std::shared_ptr<HastFunctionNode> func_node = std::make_shared<HastFunctionNode>();
         func_node->number_of_arguments = arity;
         functions.insert({func_name, func_node});
         i++;

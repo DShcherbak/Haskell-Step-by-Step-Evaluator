@@ -13,5 +13,10 @@ void HastPrinter::print_node(const std::shared_ptr<HastNode>& node, int depth) {
         print_node(node->first, depth);
     if(node->rest != nullptr)
         print_node(node->rest, depth+1);
+    if(node->type == HastNodeType::FunctionCall){
+        for(auto const & arg : node->function_call->arguments){
+            print_node(arg, depth+1);
+        }
+    }
 
 }

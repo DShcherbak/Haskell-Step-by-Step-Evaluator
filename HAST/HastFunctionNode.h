@@ -4,18 +4,17 @@
 class HaskellModel;
 
 #include <map>
-#include "HastNode.h"
 #include "HastMaskNode.h"
 #include "../Model/HaskellFunction/Mask.h"
 #include "../Model/HaskellModel.h"
+#include "Additional/HastPrinter.h"
 
-#define HAST_FN std::shared_ptr<HastFunctionNode>
-#define HAST_GUARD std::pair<HAST_N, HAST_N>
 
-class HastFunctionNode : public HastNode {
+class HastFunctionNode {
 public:
     size_t number_of_arguments = 0;
-    std::vector<HAST_N> arguments;
+    std::string name = "";
+    std::vector<std::shared_ptr<HastNode>> arguments;
     std::vector<std::shared_ptr<function::Mask>> masks;
 
     explicit HastFunctionNode();
