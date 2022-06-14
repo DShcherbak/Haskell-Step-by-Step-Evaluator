@@ -210,13 +210,29 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_data_constructors
     return result;
 }
 
+void add_an_empty_list_in_the_end(std::shared_ptr<HastNode> node, bool list){
+    auto cur = node;
+    while(cur && cur->rest && (cur->rest->type == HastNodeType::List || cur->rest->type == HastNodeType::Tuple)){
+        cur = cur->rest;
+    }
+    std::shared_ptr<HastNode> new_node;
+    if(cur->rest && cur->type == HastNodeType::List){
+        new_node = HastNodeFactory::create_node(0).with_type(HastNodeType::List).get_node();
+        new_node->rest = HastNodeFactory::create_node(0).with_value("[]").get_node();
+    } else if (cur->rest && cur->type == HastNodeType::Tuple){
+        new_node = HastNodeFactory::create_node(0).with_type(HastNodeType::Tuple).get_node();
+    }
+    new_node->first = cur->rest;
+    cur->rest = new_node;
+}
+
 std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors(const std::vector<std::shared_ptr<HastNode>>&nodes) {
     //special case for desugared lists, since they are not completely desugared, as it turns out
     std::vector<HAST_N> result;
     int i = (int) nodes.size()-1;
     while(i >= 0) {
         if(nodes[i]->value == ":") {
-            auto node = HastNodeFactory::create_node(1).with_type(HastNodeType::List).get_node();
+            auto node = HastNodeFactory::create_node(0).with_type(HastNodeType::List).get_node();
             if(nodes[i]->type == HastNodeType::InfixDataConstructor) {
                 if(!result.empty()){
                     node->rest = result.back();
@@ -252,18 +268,20 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors
         return result;
     }
     i--;
+    bool has_comma = false;
     while(i >= 0) {
         if(result[i]->value == ",") {
-            auto node = HastNodeFactory::create_node(1).with_type(type).get_node();
-            if(result[i]->type == HastNodeType::InfixDataConstructor) {
-                if(!result.empty()){
-                    node->rest = result.back();
+            has_comma = true;
+            auto node = HastNodeFactory::create_node(0).with_type(type).get_node();
+            if(result[i]->type == HastNodeType::Comma) {
+                if(!parsed_sugared_list.empty()){
+                    node->rest = parsed_sugared_list.back();
                     parsed_sugared_list.pop_back();
                 }
                 if(i > 0) node->first = result[--i];
             } else {
                 if(!parsed_sugared_list.empty()){
-                    node->first = result.back();
+                    node->first = parsed_sugared_list.back();
                     parsed_sugared_list.pop_back();
                 }
                 if(!parsed_sugared_list.empty()){
@@ -277,6 +295,9 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors
         }
         --i;
     }
+    if(has_comma)
+        add_an_empty_list_in_the_end(parsed_sugared_list[0], type == HastNodeType::List);
+
     std::reverse(parsed_sugared_list.begin(), parsed_sugared_list.end());
     return parsed_sugared_list;
 }

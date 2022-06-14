@@ -94,6 +94,8 @@ std::shared_ptr<HastMaskNode> HaskellModel::make_mask(const TokenNode& token){
     return node;
 }
 
+
+
 std::shared_ptr<HastMaskNode> HaskellModel::make_mask(const TokenTree& tree){
     std::shared_ptr<HastMaskNode> node = std::make_shared<HastMaskNode>();
     std::vector<std::shared_ptr<HastNode>> elements;

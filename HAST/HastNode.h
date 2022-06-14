@@ -13,6 +13,7 @@ class HastFunctionCallNode;
 
 enum class HastNodeType{String, Char, Int, Double, Bool,
                             List, Tuple, EmptyTuple, DataConstructor, InfixDataConstructor,
+                            Comma, PrefixComma,
                             Operator, PrefixOperator,
                             Any, Variable, FunctionCall};
 
