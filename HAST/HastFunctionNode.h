@@ -26,17 +26,17 @@ public:
                                     const std::pair<std::string, std::vector<std::shared_ptr<HastMaskNode>>> &mask,
                                     const std::vector<std::pair<std::vector<TokenNode>, std::vector<TokenNode>>> &guards);
 
-    static std::shared_ptr<HastNode> build_expression_from_list(HaskellModel& model, const std::vector<TokenNode> &list);
+    static std::shared_ptr<HastNode> build_expression_from_list(HaskellModel& model, const std::vector<TokenNode> &list, int type = 0);
 
-    static std::shared_ptr<HastNode> build_expression(HaskellModel& model, const TokenNode &token);
+    static std::shared_ptr<HastNode> build_expression(HaskellModel& model, const TokenNode &token, int type);
 
     static std::vector<std::shared_ptr<HastNode>> apply_all_functions(HaskellModel& model, const std::vector<std::shared_ptr<HastNode>> &list);
 
     static std::vector<std::shared_ptr<HastNode>>
     apply_operators(HaskellModel& model, std::vector<std::shared_ptr<HastNode>> &nodes, size_t from, size_t to);
 
-    static std::vector<std::shared_ptr<HastNode>> apply_data_constructors(HaskellModel& model,const std::vector<std::shared_ptr<HastNode>>&nodes);
-    static std::vector<std::shared_ptr<HastNode>> apply_list_constructors(const std::vector<std::shared_ptr<HastNode>>&nodes);
+    static std::vector<std::shared_ptr<HastNode>> apply_data_constructors(HaskellModel& model,const std::vector<std::shared_ptr<HastNode>>&nodes, int type);
+    static std::vector<std::shared_ptr<HastNode>> apply_list_constructors(const std::vector<std::shared_ptr<HastNode>>&nodes, int type);
 
     static std::vector<std::shared_ptr<HastNode>> apply_declaration(const std::vector<std::shared_ptr<HastNode>> &nodes);
 };

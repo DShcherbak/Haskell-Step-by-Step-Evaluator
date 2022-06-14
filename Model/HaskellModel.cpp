@@ -102,8 +102,8 @@ std::shared_ptr<HastMaskNode> HaskellModel::make_mask(const TokenTree& tree){
     for(auto const& elem : std::vector(tree.children.begin(), tree.children.end()-1)){
         elements.emplace_back(make_mask(elem));
     }
-    elements = HastFunctionNode::apply_data_constructors(*this, elements);
-    elements = HastFunctionNode::apply_list_constructors(elements);
+    elements = HastFunctionNode::apply_data_constructors(*this, elements, 1);
+    elements = HastFunctionNode::apply_list_constructors(elements, 1);
     std::string recursion_type = get<std::string>(tree.children[tree.children.size()-1]);
 
     if(elements.empty()){

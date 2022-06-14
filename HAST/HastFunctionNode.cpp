@@ -21,14 +21,14 @@ void HastFunctionNode::add_expression_with_guards(HaskellModel& model, const std
 }
 
 
-std::shared_ptr<HastNode> HastFunctionNode::build_expression(HaskellModel& model, const TokenNode& token){
-    std::shared_ptr<HastNode> node = HastNodeFactory::create_node(1).get_node();
+std::shared_ptr<HastNode> HastFunctionNode::build_expression(HaskellModel& model, const TokenNode& token, int type){
+    std::shared_ptr<HastNode> node = HastNodeFactory::create_node(type).get_node();
     if(token.which() == 0){
         auto tree = get<TokenTree>(token);
-        node = build_expression_from_list(model, tree.children);
+        node = build_expression_from_list(model, tree.children, type);
     } else {
         auto value_str = get<std::string>(token);
-        node = HastNodeFactory::create_node(1).with_value(value_str).get_node();
+        node = HastNodeFactory::create_node(type).with_value(value_str).get_node();
     }
     return node;
 }
@@ -136,17 +136,17 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_declaration(const
     return nodes;
 }
 
-std::shared_ptr<HastNode> HastFunctionNode::build_expression_from_list(HaskellModel& model, const std::vector<TokenNode>& list){
+std::shared_ptr<HastNode> HastFunctionNode::build_expression_from_list(HaskellModel& model, const std::vector<TokenNode>& list, int type){
     std::vector<std::shared_ptr<HastNode>> nodes;
     if(list.empty())
-        return {};
+        return nullptr;
     for(const auto & element : list){
-        nodes.emplace_back(build_expression(model, element));
+        nodes.emplace_back(build_expression(model, element, type));
     }
     nodes = apply_all_functions(model, nodes);
-    nodes = apply_data_constructors(model, nodes);
+    nodes = apply_data_constructors(model, nodes, type);
     nodes = apply_operators(model, nodes, 6, 9);
-    nodes = apply_list_constructors(nodes);
+    nodes = apply_list_constructors(nodes, type);
     nodes = apply_operators(model,nodes, 1, 5);
     nodes = apply_declaration(nodes);
     if(nodes.size() == 2 && nodes[1]->value == "()"){
@@ -157,7 +157,7 @@ std::shared_ptr<HastNode> HastFunctionNode::build_expression_from_list(HaskellMo
     return nodes[0];
 }
 
-std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_data_constructors(HaskellModel& model, const std::vector<std::shared_ptr<HastNode>>&nodes) {
+std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_data_constructors(HaskellModel& model, const std::vector<std::shared_ptr<HastNode>>&nodes, int type) {
     int i = 0, n = (int) nodes.size();
     if (n == 0)
         return {};
@@ -170,14 +170,14 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_data_constructors
         if (nodes[i]->type == HastNodeType::DataConstructor) {
             if (model.data_constructor_arity.contains(nodes[i]->value)) {
                 int arity = model.data_constructor_arity[nodes[i]->value];
-                auto node = HastNodeFactory::create_node(1).with_value(nodes[i]->value).get_node();
+                auto node = HastNodeFactory::create_node(type).with_value(nodes[i]->value).get_node();
                 result.emplace_back(node);
                 while (arity > 0 && i < n - 1) {
                     ++i;
                     node->first = nodes[i];
                     --arity;
                     if (arity > 0) {
-                        node->rest = HastNodeFactory::create_node(1).with_type(
+                        node->rest = HastNodeFactory::create_node(type).with_type(
                                 HastNodeType::DataConstructor).get_node();
                         node = node->rest;
                     }
@@ -192,7 +192,7 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_data_constructors
             }
         } else if (nodes[i]->type == HastNodeType::InfixDataConstructor && nodes[i]->value != ":") {
             if (model.infix_data_constructors.contains(nodes[i]->value)) {
-                auto node = HastNodeFactory::create_node(1).with_value(nodes[i]->value).get_node();
+                auto node = HastNodeFactory::create_node(type).with_value(nodes[i]->value).get_node();
                 if (!result.empty()) {
                     node->first = result.back();
                     result.pop_back();
@@ -226,13 +226,13 @@ void add_an_empty_list_in_the_end(std::shared_ptr<HastNode> node, bool list){
     cur->rest = new_node;
 }
 
-std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors(const std::vector<std::shared_ptr<HastNode>>&nodes) {
+std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors(const std::vector<std::shared_ptr<HastNode>>&nodes, int type) {
     //special case for desugared lists, since they are not completely desugared, as it turns out
     std::vector<HAST_N> result;
     int i = (int) nodes.size()-1;
     while(i >= 0) {
         if(nodes[i]->value == ":") {
-            auto node = HastNodeFactory::create_node(0).with_type(HastNodeType::List).get_node();
+            auto node = HastNodeFactory::create_node(type).with_type(HastNodeType::List).get_node();
             if(nodes[i]->type == HastNodeType::InfixDataConstructor) {
                 if(!result.empty()){
                     node->rest = result.back();
@@ -257,13 +257,13 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors
     }
     std::vector<std::shared_ptr<HastNode>> parsed_sugared_list;
     std::reverse(result.begin(), result.end());
-    auto type = HastNodeType::List;
+    auto node_type = HastNodeType::List;
     i = (int) result.size()-1;
     if(result[i]->value == "[]"){
-        type = HastNodeType::List;
+        node_type = HastNodeType::List;
     }
     else if (result[i]->value == "()"){
-        type = HastNodeType::Tuple;
+        node_type = HastNodeType::Tuple;
     } else {
         return result;
     }
@@ -272,7 +272,7 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors
     while(i >= 0) {
         if(result[i]->value == ",") {
             has_comma = true;
-            auto node = HastNodeFactory::create_node(0).with_type(type).get_node();
+            auto node = HastNodeFactory::create_node(type).with_type(node_type).get_node();
             if(result[i]->type == HastNodeType::Comma) {
                 if(!parsed_sugared_list.empty()){
                     node->rest = parsed_sugared_list.back();
@@ -296,7 +296,7 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors
         --i;
     }
     if(has_comma)
-        add_an_empty_list_in_the_end(parsed_sugared_list[0], type == HastNodeType::List);
+        add_an_empty_list_in_the_end(parsed_sugared_list[0], node_type == HastNodeType::List);
 
     std::reverse(parsed_sugared_list.begin(), parsed_sugared_list.end());
     return parsed_sugared_list;
