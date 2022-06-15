@@ -8,11 +8,11 @@ ControllerCommand CommandController::get_command(){
     std::string string_command = "";
     std::cout << "Insert command: ";
     std::cin >> string_command;
-    if(string_command == "0"){
+    if(string_command == "0" || string_command == "Step-in"){
         return ControllerCommand::STEP_IN;
-    } else if (string_command == "1"){
+    } else if (string_command == "1" || string_command == "Step-next"){
         return ControllerCommand::STEP_FORWARD;
-    } else if (string_command == "2"){
+    } else if (string_command == "2" || string_command == "Step-out"){
         return ControllerCommand::STEP_OUT;
     } else {
         return ControllerCommand::BAD_COMMAND;

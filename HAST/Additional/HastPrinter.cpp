@@ -70,5 +70,5 @@ std::string HastPrinter::node_to_string(const std::shared_ptr<HastNode> &node) {
 }
 
 std::string HastPrinter::node_to_string(const std::shared_ptr<HastFunctionCallNode>& node){
-
+    return "FUNCTION_NODE";
 }

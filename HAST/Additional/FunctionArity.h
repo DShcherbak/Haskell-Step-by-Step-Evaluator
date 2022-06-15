@@ -7,7 +7,7 @@
 class FunctionArity {
 public:
     std::vector<FunctionArity> argument_arity;
-
+    int arity();
     static FunctionArity build_arity(const std::vector<TokenNode>& nodes);
 };
 

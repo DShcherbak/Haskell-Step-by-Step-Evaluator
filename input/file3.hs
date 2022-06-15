@@ -11,7 +11,7 @@ parseTuple (1,2,3,4,5) = (1,2,3,4,5)
 parseTuple xs = (12,23,34,45,56)
 
 combineMap :: (a -> b) -> (b -> c) -> [a] -> [c]
-combineMap f g arr = map (f.g) arr
+combineMap f1 f2 arr = map (f1.f2) arr
 
 combineMap :: [Int] -> [Int]
 combineIncAndDouble arr = combineMap (+1) (*2) arr

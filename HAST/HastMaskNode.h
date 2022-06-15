@@ -5,6 +5,7 @@
 #include "HastNode.h"
 
 class HastMaskNode : public HastNode{
+public:
     std::pair<bool, std::map<std::string, HAST_N>> fits(const HAST_N& argument);
 };
 

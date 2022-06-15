@@ -2,11 +2,13 @@
 
 HastFunctionNode::HastFunctionNode() = default;
 
+
+
 void HastFunctionNode::add_expression(HaskellModel& model, const std::pair<std::string, std::vector<std::shared_ptr<HastMaskNode>>>& mask,
                                       const TokenList &body) {
     auto mask_element = std::make_shared<function::Mask>();
     name = mask.first;
-    mask_element->add_arg_templates(mask.second);
+    mask_element->add_arg_templates(mask.second, arity);
     mask_element->add_body(model, body);
     masks.emplace_back(mask_element);
 }
@@ -15,17 +17,25 @@ void HastFunctionNode::add_expression_with_guards(HaskellModel& model, const std
                                                   const std::vector<std::pair<TokenList, TokenList>> &guards) {
     auto mask_element = std::make_shared<function::Mask>();
     name = mask.first;
-    mask_element->add_arg_templates(mask.second);
+    mask_element->add_arg_templates(mask.second, arity);
     mask_element->add_guards(model, guards);
     masks.emplace_back(mask_element);
 }
 
+std::shared_ptr<HastNode> HastFunctionNode::apply(const std::vector<std::shared_ptr<HastNode>>& args) {
+    for(auto & mask : masks){
+        auto match_mask = mask->fits(args);
+        if(match_mask.first){
+            return nullptr;
+        }
+    }
+}
 
-std::shared_ptr<HastNode> HastFunctionNode::build_expression(HaskellModel& model, const TokenNode& token, int type){
+std::shared_ptr<HastNode> HastFunctionNode::build_expression(HaskellModel& model, const TokenNode& token, int type, const std::map<std::string, int> &function_vars){
     std::shared_ptr<HastNode> node = HastNodeFactory::create_node(type).get_node();
     if(token.which() == 0){
         auto tree = get<TokenTree>(token);
-        node = build_expression_from_list(model, tree.children, type);
+        node = build_expression_from_list(model, tree.children, type, function_vars);
     } else {
         auto value_str = get<std::string>(token);
         node = HastNodeFactory::create_node(type).with_value(value_str).get_node();
@@ -33,16 +43,29 @@ std::shared_ptr<HastNode> HastFunctionNode::build_expression(HaskellModel& model
     return node;
 }
 
-std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_all_functions(HaskellModel& model, const std::vector<std::shared_ptr<HastNode>>& nodes) {
+std::vector<std::shared_ptr<HastNode>>
+HastFunctionNode::apply_all_functions(HaskellModel &model, const std::vector<std::shared_ptr<HastNode>> &nodes,
+                                      std::map<std::string, int> function_vars) {
     size_t i = 0, n = nodes.size();
     std::vector<std::shared_ptr<HastNode>> result;
 
     while(i < n){
-        if(nodes[i]->type == HastNodeType::Variable && model.functions.contains(nodes[i]->value)){
-            std::shared_ptr<HastNode> node = HastNodeFactory::create_node(model.functions[nodes[i]->value]).get_node();
-
+        if(nodes[i]->type == HastNodeType::Variable) {
+            std::shared_ptr<HastNode> node;
+            if (model.functions.contains(nodes[i]->value))
+                node = HastNodeFactory::create_node(model.functions[nodes[i]->value]).get_node();
+            else if (function_vars.contains(nodes[i]->value)){
+                node = std::make_shared<HastNode>();
+                node->type = HastNodeType::FunctionCall;
+                node->function_call = std::make_shared<HastFunctionCallNode>();
+                node->function_call->arity = function_vars[nodes[i]->value];
+            } else {
+                result.emplace_back(nodes[i]);
+                ++i;
+                continue;
+            }
             size_t arity = node->function_call->arity;
-            while(arity > 0){
+            while (arity > 0) {
                 ++i;
                 --arity;
                 node->function_call->arguments.push_back(nodes[i]);
@@ -136,14 +159,14 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_declaration(const
     return nodes;
 }
 
-std::shared_ptr<HastNode> HastFunctionNode::build_expression_from_list(HaskellModel& model, const std::vector<TokenNode>& list, int type){
+std::shared_ptr<HastNode> HastFunctionNode::build_expression_from_list(HaskellModel& model, const std::vector<TokenNode>& list, int type, const std::map<std::string, int> &function_vars){
     std::vector<std::shared_ptr<HastNode>> nodes;
     if(list.empty())
         return nullptr;
     for(const auto & element : list){
-        nodes.emplace_back(build_expression(model, element, type));
+        nodes.emplace_back(build_expression(model, element, type, function_vars));
     }
-    nodes = apply_all_functions(model, nodes);
+    nodes = apply_all_functions(model, nodes, function_vars);
     nodes = apply_data_constructors(model, nodes, type);
     nodes = apply_operators(model, nodes, 6, 9);
     nodes = apply_list_constructors(nodes, type);

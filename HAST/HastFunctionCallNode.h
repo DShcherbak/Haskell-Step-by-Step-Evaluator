@@ -18,6 +18,8 @@ public:
     HastFunctionCallNode(std::shared_ptr<HastFunctionNode> function);
 
     std::shared_ptr<HastNode> apply();
+
+    std::shared_ptr<HastNode> apply(const std::vector<std::shared_ptr<HastNode>> &args);
 };
 
 

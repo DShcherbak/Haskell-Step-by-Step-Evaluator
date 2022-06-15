@@ -170,7 +170,7 @@ std::vector<TokenTree> HaskellModel::add_arity(std::vector<TokenTree>& trees){
     std::vector<TokenTree> result;
     for(auto & tree : trees){
         if(tree.children.size() > 1 && tree.children[1].which() == 1 && get<std::string>(tree.children[1]) == "::"){
-            std::string func_name = get<std::string>(tree.children[1]);
+            std::string func_name = get<std::string>(tree.children[0]);
             auto function = std::make_shared<HastFunctionNode>();
             function->name = func_name;
             tree.children.emplace_back("()");
@@ -259,8 +259,6 @@ std::vector<TokenTree> HaskellModel::process_headers(const std::vector<TokenTree
                 } catch(std::exception& ex){
                     throw IncorrectTokenException(get<TokenTree>(tree.children[1]), "Module name is");
                 }
-            } else if (name == "import"){
-                addImportToModel(tree.children);
             } else {
                 filtered.emplace_back(tree);
             }
@@ -332,8 +330,7 @@ bool HaskellModel::parse_expression(const std::string& basicString) {
     line.emplace_back(basicString);
     auto tokens = lines::HaskellFileParser::parse_lines(line);
     std::vector<TokenNode> trees = Lexer::functions_to_nodes(tokens);
-    std::shared_ptr<HastNode> node;
-    node = HastFunctionNode::build_expression_from_list(*this, trees);
+    current_expression = HastFunctionNode::build_expression_from_list(*this, trees);
  //   HastPrinter::print_node(node);
 
 

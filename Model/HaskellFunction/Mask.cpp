@@ -45,16 +45,44 @@ std::shared_ptr<HastNode> function::Mask::apply_args(const std::vector<std::shar
 }
 
 void function::Mask::add_body(HaskellModel& model, const std::vector<TokenNode> &body) {
-    body_node = HastFunctionNode::build_expression_from_list(model, body);
+    body_node = HastFunctionNode::build_expression_from_list(model, body, 0, function_variables);
 }
 
 void function::Mask::add_guards(HaskellModel& model, const std::vector<std::pair<TokenList, TokenList>> &guards) {
     for (auto const &guard_pair: guards) {
-        this->guards.push_back({HastFunctionNode::build_expression_from_list(model, guard_pair.first),
-                                HastFunctionNode::build_expression_from_list(model, guard_pair.second)});
+        this->guards.push_back({HastFunctionNode::build_expression_from_list(model, guard_pair.first, 0, function_variables),
+                                HastFunctionNode::build_expression_from_list(model, guard_pair.second, 0, function_variables)});
     }
 }
 
-void function::Mask::add_arg_templates(const std::vector<std::shared_ptr<HastMaskNode>> &arg_templates) {
-    this->argument_templates = arg_templates;
+std::map<std::string, int> find_function_variables(std::vector<std::shared_ptr<HastMaskNode>> masks, FunctionArity arity){
+    std::map<std::string, int> result;
+    int i = 0;
+    for(auto & mask : masks){
+        if(mask->type == HastNodeType::Variable && arity.argument_arity.size() > i && arity.argument_arity[i].arity() > 0){
+            result.insert({mask->value, arity.argument_arity[i].arity()});
+        }
+        i++;
+    }
+    return result;
+}
+
+void function::Mask::add_arg_templates(const std::vector<std::shared_ptr<HastMaskNode>> &arg_templates, FunctionArity& arity) {
+    argument_templates = arg_templates;
+    function_variables = find_function_variables(arg_templates, arity);
+}
+
+std::pair<bool, std::map<std::string, HAST_N>> function::Mask::fits(const std::vector<std::shared_ptr<HastNode>> &arguments) {
+    size_t n = arguments.size();
+    assert(argument_templates.size() == n);
+    std::map<std::string, HAST_N> variable_map;
+    for(size_t i = 0; i < n; i++){
+        auto match_arg = argument_templates[i]->fits(arguments[i]);
+        if(!match_arg.first)
+            return {false, {}};
+        for(auto & pair : match_arg.second){
+            variable_map.insert(pair);
+        }
+    }
+    return {true, variable_map};
 }
