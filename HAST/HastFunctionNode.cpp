@@ -153,7 +153,7 @@ std::shared_ptr<HastNode> HastFunctionNode::build_expression_from_list(HaskellMo
         nodes.pop_back();
     }
     assert(nodes.size() == 1);
-    HastPrinter::print_node(nodes[0]);
+    //HastPrinter::print_node(nodes[0]);
     return nodes[0];
 }
 
@@ -259,6 +259,8 @@ std::vector<std::shared_ptr<HastNode>> HastFunctionNode::apply_list_constructors
     std::reverse(result.begin(), result.end());
     auto node_type = HastNodeType::List;
     i = (int) result.size()-1;
+    if(result.size() <= 1)
+        return result;
     if(result[i]->value == "[]"){
         node_type = HastNodeType::List;
     }

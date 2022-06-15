@@ -9,6 +9,8 @@
 class HastPrinter {
 public:
     static void print_node(const std::shared_ptr<HastNode>& node, int depth = 0);
+    static std::string node_to_string(const std::shared_ptr<HastNode>& node);
+    static std::string node_to_string(const std::shared_ptr<HastFunctionCallNode>& node);
 };
 
 

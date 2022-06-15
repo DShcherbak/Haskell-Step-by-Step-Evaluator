@@ -8,8 +8,6 @@ void HaskellModel::add_statements(std::vector<std::string> &statements) {
     token_tree_vector = process_type_classes(token_tree_vector);
     //operators and function type definitions
     process_functions(token_tree_vector);
-    std::cout << functions.size() << std::endl;
-    std::cout << functions.size() << std::endl;
 }
 
 std::shared_ptr<HastFunctionNode> HaskellModel::get_or_create_function(const std::string &name) {
@@ -60,7 +58,7 @@ std::tuple<TokenList, GuardVector> process_guards(const TokenTree& tree){
     return result;
 }
 
-std::vector<std::tuple<TokenList, GuardVector>> HaskellModel::add_function_arity(const std::vector<TokenTree>& trees) {
+std::vector<std::tuple<TokenList, GuardVector>> HaskellModel::process_guards_for_all_functions(const std::vector<TokenTree>& trees) {
     std::vector<std::tuple<TokenList, GuardVector>> result;
     for(auto & tree : trees){
         auto processed_guards = process_guards(tree);
@@ -70,15 +68,14 @@ std::vector<std::tuple<TokenList, GuardVector>> HaskellModel::add_function_arity
             continue;
         std::string function_name = get<std::string>(function_mask[0]);
         std::shared_ptr<HastFunctionNode> fn = get_or_create_function(function_name);
-        fn->number_of_arguments = function_mask.size()-1;
     }
-    for(const auto& f : functions){
+ /*   for(const auto& f : functions){
         std::cout << f.first << " : " << f.second->number_of_arguments << std::endl;
     }
     std::cout << "OPERATORS: \n";
     for(const auto& f : operators){
         std::cout << f.second->value << " : " << f.second->precedence << std::endl;
-    }
+    }*/
     return result;
 }
 
@@ -102,14 +99,18 @@ std::shared_ptr<HastMaskNode> HaskellModel::make_mask(const TokenTree& tree){
     for(auto const& elem : std::vector(tree.children.begin(), tree.children.end()-1)){
         elements.emplace_back(make_mask(elem));
     }
-    elements = HastFunctionNode::apply_data_constructors(*this, elements, 1);
-    elements = HastFunctionNode::apply_list_constructors(elements, 1);
-    std::string recursion_type = get<std::string>(tree.children[tree.children.size()-1]);
 
+    std::string recursion_type = get<std::string>(tree.children[tree.children.size()-1]);
     if(elements.empty()){
         node->set_value(recursion_type);
         return node;
     }
+
+    elements = HastFunctionNode::apply_data_constructors(*this, elements, 1);
+    elements = HastFunctionNode::apply_list_constructors(elements, 1);
+
+
+
 
     if(recursion_type == "[]"){
         node->type = HastNodeType::List;
@@ -165,12 +166,28 @@ std::pair<std::string, std::vector<std::shared_ptr<HastMaskNode>>> HaskellModel:
     return result;
 }
 
-void HaskellModel::process_functions(const std::vector<TokenTree>& trees) {
-    auto function_expression_vector = add_function_arity(trees);
+std::vector<TokenTree> HaskellModel::add_arity(std::vector<TokenTree>& trees){
+    std::vector<TokenTree> result;
+    for(auto & tree : trees){
+        if(tree.children.size() > 1 && tree.children[1].which() == 1 && get<std::string>(tree.children[1]) == "::"){
+            std::string func_name = get<std::string>(tree.children[1]);
+            auto function = std::make_shared<HastFunctionNode>();
+            function->name = func_name;
+            tree.children.emplace_back("()");
+            function->arity = FunctionArity::build_arity(std::vector(tree.children.begin()+2, tree.children.end()));
+            functions[func_name] = function;
+        } else {
+            result.push_back(tree);
+        }
+    }
+    return result;
+}
+
+void HaskellModel::process_functions(std::vector<TokenTree>& trees) {
+    auto function_definitions = add_arity(trees);
+    auto function_expression_vector = process_guards_for_all_functions(function_definitions);
     for(auto const& expr : function_expression_vector){
         auto mask = build_full_function_mask(std::get<0>(expr));
-        for(auto const& node : mask.second)
-            HastPrinter::print_node(node);
         auto bodies = std::get<1>(expr);
 
         std::string func_name = mask.first;
@@ -221,7 +238,7 @@ std::vector<TokenTree> HaskellModel::process_data_types(const std::vector<TokenT
             std::string name = get<std::string>(tree.children[0]);
             if(name == "data"){
                 add_data_structure(tree);
-            } else { //TODO: type, newtype, ???
+            } else {
                 filtered.emplace_back(tree);
             }
         } else {
@@ -258,12 +275,8 @@ void HaskellModel::setName(const std::string &name) {
     moduleName = name;
 }
 
-void HaskellModel::addImportToModel(const std::vector<TokenNode> &import) {
-    //TODO: Implement
-}
-
 void HaskellModel::add_data_structure(const TokenTree &tree) {
-    //TODO: Implement
+    this->infix_data_constructors.insert(get<std::string>(tree.children[1]));
 }
 
 void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
@@ -273,7 +286,6 @@ void HaskellModel::read_prelude(const std::vector<std::string> &lines) {
         std::string func_arity = lines[i].substr(lines[i].find(' ')+1);
         int arity = std::stoi(func_arity);
         std::shared_ptr<HastFunctionNode> func_node = std::make_shared<HastFunctionNode>();
-        func_node->number_of_arguments = arity;
         functions.insert({func_name, func_node});
         i++;
     }
@@ -322,7 +334,7 @@ bool HaskellModel::parse_expression(const std::string& basicString) {
     std::vector<TokenNode> trees = Lexer::functions_to_nodes(tokens);
     std::shared_ptr<HastNode> node;
     node = HastFunctionNode::build_expression_from_list(*this, trees);
-    HastPrinter::print_node(node);
+ //   HastPrinter::print_node(node);
 
 
     temporary_countdown = "|||||";
@@ -330,31 +342,44 @@ bool HaskellModel::parse_expression(const std::string& basicString) {
 }
 
 std::string HaskellModel::get_current_expression() {
-    return temporary_countdown;
+    return HastPrinter::node_to_string(current_expression);
 }
 
 bool HaskellModel::expression_not_week_normal_form() {
-    return temporary_countdown.length() > 3;
+    full_reduction_mode |= (current_expression->type != HastNodeType::FunctionCall);
+    return !full_reduction_mode;
 }
 
 bool HaskellModel::expression_not_reduced() {
-    return temporary_countdown.length() > 0;
+    return reduced;
 }
 
 void HaskellModel::perform_command(ControllerCommand command){
+    std::pair<bool, std::shared_ptr<HastNode>> next_step;
     switch(command){
         case ControllerCommand::BAD_COMMAND:
             return;
         case ControllerCommand::STEP_FORWARD:
-            temporary_countdown = temporary_countdown.substr(0, temporary_countdown.length()-1);
-            return;
+            next_step = current_expression->apply();
+            if(next_step.first){
+                current_expression = next_step.second;
+            } else {
+                full_reduction_mode = true;
+                reduced = true;
+            }
+            break;
         case ControllerCommand::STEP_IN:
-            temporary_countdown = temporary_countdown.append(temporary_countdown);
-            temporary_countdown = temporary_countdown.append(temporary_countdown);
-            return;
+            next_step = current_expression->apply();
+            if(next_step.first){
+                current_expression = next_step.second;
+            } else {
+                full_reduction_mode = true;
+                reduced = true;
+            }
+            break;
         case ControllerCommand::STEP_OUT:
-            temporary_countdown = temporary_countdown.substr(0, temporary_countdown.length()/4);
-            return;
+            current_expression = current_expression->compute_fully();
+            break;
     }
 }
 

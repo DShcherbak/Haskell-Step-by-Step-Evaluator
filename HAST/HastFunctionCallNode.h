@@ -16,6 +16,8 @@ public:
 
     HastFunctionCallNode()=default;
     HastFunctionCallNode(std::shared_ptr<HastFunctionNode> function);
+
+    std::shared_ptr<HastNode> apply();
 };
 
 

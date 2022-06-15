@@ -36,13 +36,8 @@ public:
 
     static std::string type_to_str(HastNodeType type);
 
-
+    std::pair<bool,std::shared_ptr<HastNode>> apply();
     std::shared_ptr<HastNode> compute_fully();
-
-
 };
-
-
-
 
 #endif //HASKELL_STEP_BY_STEP_EVALUATOR_HASTNODE_H

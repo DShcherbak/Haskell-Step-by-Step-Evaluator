@@ -3,6 +3,7 @@
 //
 
 #include "HastNode.h"
+#include "HastFunctionCallNode.h"
 
 HastNode::HastNode(const TokenNode &node) {
     if(node.which() == 0)
@@ -93,7 +94,46 @@ void HastNode::set_value(const std::string &value) {
 }
 
 std::shared_ptr<HastNode> HastNode::compute_fully() {
-    return std::make_shared<HastNode>();
+    if(type == HastNodeType::FunctionCall){
+        auto function_result = function_call->apply();
+        return function_result->compute_fully();
+    } else if (type == HastNodeType::List || type == HastNodeType::Tuple){
+        auto result = HastNodeFactory::create_node(0).with_type(type).get_node();
+        result->first = first->compute_fully();
+        if(rest)
+            result->rest = rest->compute_fully();
+        return result;
+    } //operator
+    return nullptr;
+}
+
+std::pair<bool,std::shared_ptr<HastNode>> HastNode::apply() {
+    if(type == HastNodeType::FunctionCall){
+        auto function_result = function_call->apply();
+        return {true, function_result};
+    } else if (type == HastNodeType::List || type == HastNodeType::Tuple){//operator
+        auto result = HastNodeFactory::create_node(0).with_type(type).get_node();
+        if(first)
+            result->first = first;
+        if (rest)
+            result->rest = rest;
+        if(first){
+            auto apply_result = first->apply();
+            if(apply_result.first) {
+                result->first = apply_result.second;
+                return {true, result};
+            }
+        }
+        if(rest){
+            auto apply_result = rest->apply();
+            if(apply_result.first) {
+                result->rest = apply_result.second;
+                return {true, result};
+            }
+        }
+        return {false, result};
+    } //operator
+    return {false, nullptr};
 }
 
 

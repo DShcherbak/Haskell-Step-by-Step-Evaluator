@@ -8,11 +8,12 @@ class HaskellModel;
 #include "../Model/HaskellFunction/Mask.h"
 #include "../Model/HaskellModel.h"
 #include "Additional/HastPrinter.h"
+#include "Additional/FunctionArity.h"
 
 
 class HastFunctionNode {
 public:
-    size_t number_of_arguments = 0;
+    FunctionArity arity;
     std::string name = "";
     std::vector<std::shared_ptr<HastNode>> arguments;
     std::vector<std::shared_ptr<function::Mask>> masks;

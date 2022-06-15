@@ -36,7 +36,9 @@ public:
     std::string get_current_expression();
 
     bool expression_not_week_normal_form();
+    bool full_reduction_mode;
     bool expression_not_reduced();
+    bool reduced;
 
     void perform_command(ControllerCommand command);
 
@@ -47,7 +49,7 @@ private:
     std::vector<TokenTree> process_headers(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_data_types(const std::vector<TokenTree> &statements);
     std::vector<TokenTree> process_type_classes(const std::vector<TokenTree> &statements);
-    void process_functions(const std::vector<TokenTree> &statements);
+    void process_functions(std::vector<TokenTree> &statements);
 
     std::shared_ptr<HastFunctionNode> get_or_create_function(const std::string &name);
 
@@ -56,7 +58,7 @@ private:
 
     void add_data_structure(const TokenTree &tree);
 
-    std::vector<std::tuple<TokenList, GuardVector>> add_function_arity(const std::vector<TokenTree> &trees);
+    std::vector<std::tuple<TokenList, GuardVector>> process_guards_for_all_functions(const std::vector<TokenTree> &trees);
 
 
     std::shared_ptr<HastMaskNode> make_mask(const TokenNode &token);
@@ -64,6 +66,8 @@ private:
     std::shared_ptr<HastMaskNode> make_mask(const TokenTree &tree);
 
     std::pair<std::string, std::vector<std::shared_ptr<HastMaskNode>>> build_full_function_mask(const TokenList &list);
+
+    std::vector<TokenTree> add_arity(std::vector<TokenTree> &trees);
 };
 
 
